@@ -1,0 +1,143 @@
+<div *ngIf="centarDetails">
+  <h2>{{ centarDetails.ime }}</h2>
+  <p><strong>Opis:</strong> {{ centarDetails.ophis }}</p>
+  <p><strong>City:</strong> {{ centarDetails.grad }}</p>
+  <p><strong>Address:</strong> {{ centarDetails.adresa }}</p>
+  <p><strong>Rating:</strong> {{ centarDetails.rating }}</p>
+  <p><strong>Generated:</strong> {{ centarDetails.datumKreacije | date:'yyyy-MM-dd' }}</p> 
+
+  <!-- IMAGE AND PDF SECTION -->
+  <div style="margin-top: 20px; margin-bottom: 20px;">
+    <h3>Mediji</h3>
+    
+    <!-- Display Image if available -->
+    <div *ngIf="centarDetails.imagePath" style="margin-bottom: 15px;">
+      <h5>Slika centra:</h5>
+      <img [src]="'http://localhost:9000/sportski-centri-images/' + centarDetails.imagePath" 
+           alt="Centar Image" 
+           style="max-width: 500px; border: 1px solid #ccc; border-radius: 8px;">
+    </div>
+
+    <!-- Display PDF download if available -->
+    <div *ngIf="centarDetails.pdfPath">
+      <h5>PDF Dokument:</h5>
+      <p>{{ centarDetails.pdfPath }}</p>
+      <button (click)="downloadPdf()" class="btn btn-primary">
+        <i class="bi bi-download"></i> Download PDF
+      </button>
+      <div *ngIf="pdfDownloadError" class="alert alert-danger" style="margin-top: 10px;">
+        {{ pdfDownloadError }}
+      </div>
+    </div>
+
+    <div *ngIf="!centarDetails.imagePath && !centarDetails.pdfPath">
+      <p style="color: #999;">Nema postavljenih medija za ovaj centar.</p>
+    </div>
+  </div>
+
+  <h3>Discipline:</h3>
+  <ul>
+    <li *ngFor="let disciplina of centarDetails.discipline">
+      <strong>{{ disciplina }}</strong>
+    </li>
+  </ul>
+
+  <h3>Working Hours:</h3>
+  <ul>
+    <li *ngFor="let radnoVreme of centarDetails.radnoVremeDTOList">
+      <strong>{{ radnoVreme.danNedelje }}</strong>: {{ radnoVreme.vremeOtvaranja }} - {{ radnoVreme.vremeZatvaranja }}
+    </li>
+  </ul>
+
+  <!-- Edit Button (only visible for ADMIN) -->
+  <button *ngIf="uloga === 'ADMIN'" (click)="onEditClick()">Edit</button>
+
+  <!-- Reservation Form (only visible for KORISNIK) -->
+  <div *ngIf="uloga === 'KORISNIK'">
+    <h3>Make a Reservation</h3>
+    <form [formGroup]="reservationForm" (ngSubmit)="onSubmitReservation()">
+      <label for="datum">Date:</label>
+      <input id="datum" type="date" formControlName="datum" required>
+      <br>
+
+      <label for="pocetak">Start Time:</label>
+      <input id="pocetak" type="time" formControlName="pocetak" required>
+      <br>
+
+      <label for="kraj">End Time:</label>
+      <input id="kraj" type="time" formControlName="kraj" required>
+      <br>
+
+      <button type="submit" [disabled]="reservationForm.invalid">Reserve</button>
+    </form>
+
+    <!-- Success Message -->
+    <div *ngIf="reservationSuccessMessage" class="alert alert-success">
+      {{ reservationSuccessMessage }}
+    </div>
+
+    <!-- Review Section -->
+    <h3>Submit a Review</h3>
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+      <table>
+        <tr>
+          <th>Opremljenost</th>
+          <td>
+            <div class="flex-col">
+              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                <input type="radio" formControlName="opremljenost" [value]="num"> {{ num }}
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Osoblje</th>
+          <td>
+            <div class="flex-col">
+              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                <input type="radio" formControlName="osoblje" [value]="num"> {{ num }}
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Higijena</th>
+          <td>
+            <div class="flex-col">
+              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                <input type="radio" formControlName="higijena" [value]="num"> {{ num }}
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Prostorija</th>
+          <td>
+            <div class="flex-col">
+              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                <input type="radio" formControlName="prostorija" [value]="num"> {{ num }}
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <button type="submit" [disabled]="reviewForm.invalid">Submit Review</button>
+    </form>
+
+    <!-- Success Message -->
+    <div *ngIf="reviewSuccessMessage" class="alert alert-success">
+      {{ reviewSuccessMessage }}
+    </div>
+  </div>
+</div>
+
+<!-- Loading message if data is not yet available -->
+<div *ngIf="!centarDetails && !errorMessage">
+  <p>Loading...</p>
+</div>
+
+<!-- Error message -->
+<div *ngIf="errorMessage" class="alert alert-danger">
+  {{ errorMessage }}
+</div>

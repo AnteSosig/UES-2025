@@ -1,0 +1,209 @@
+<div class="container">
+    <h2>Pretraga Objekata (Search Centers)</h2>
+    
+    <!-- UNIFIED SEARCH BAR -->
+    <div class="unified-search mb-4">
+      <form [formGroup]="searchForm">
+        <div class="form-group">
+          <label for="query"><strong>Pretraži objekte po nazivu, opisu ili sadržaju PDF-a:</strong></label>
+          <div class="input-group">
+            <input 
+              formControlName="query" 
+              id="query" 
+              class="form-control form-control-lg" 
+              type="text" 
+              placeholder="Unesite tekst za pretragu (latinica ili ćirilica)..."
+              (keyup.enter)="onSearchUnified()">
+            <div class="input-group-append">
+              <button (click)="onSearchUnified()" type="button" class="btn btn-primary btn-lg">
+                <span *ngIf="!isSearching">🔍 Pretraži</span>
+                <span *ngIf="isSearching">Pretražujem...</span>
+              </button>
+            </div>
+          </div>
+          <small class="form-text text-muted">
+            Pretraga pretražuje nazive, opise i sadržaj PDF dokumenata. Podržava latinično i ćirilično pismo.
+          </small>
+        </div>
+      </form>
+    </div>
+
+    <!-- Toggle Advanced Search -->
+    <div class="mb-3">
+      <button (click)="toggleAdvancedSearch()" type="button" class="btn btn-secondary">
+        {{ showAdvancedSearch ? '▲ Sakrij naprednu pretragu' : '▼ Prikaži naprednu pretragu' }}
+      </button>
+    </div>
+
+    <!-- ADVANCED SEARCH FORM (Collapsible) -->
+    <form [formGroup]="searchForm" (ngSubmit)="onSubmitAdvanced()" *ngIf="showAdvancedSearch" class="advanced-search">
+      <h4 class="mt-4">Napredna Pretraga (Advanced Search)</h4>
+
+      <!-- City -->
+      <div class="form-group">
+        <label for="grad">Grad (City)</label>
+        <input formControlName="grad" id="grad" class="form-control" type="text" placeholder="Enter city">
+      </div>
+
+      <!-- Rating Min/Max -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="ocenamin">Minimalna Ocena (Min Rating)</label>
+            <input formControlName="ocenamin" id="ocenamin" class="form-control" type="number" placeholder="e.g. 0">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="ocenamax">Maksimalna Ocena (Max Rating)</label>
+            <input formControlName="ocenamax" id="ocenamax" class="form-control" type="number" placeholder="e.g. 5">
+          </div>
+        </div>
+      </div>
+
+      <!-- Disciplines -->
+      <h5>Discipline</h5>
+      <div formArrayName="discipline">
+        <div *ngFor="let disciplineControl of getDisciplines().controls; let i = index" class="d-flex mb-2">
+          <input [formControlName]="i" class="form-control" placeholder="Enter discipline">
+          <button (click)="removeDiscipline(i)" type="button" class="btn btn-danger ml-2">Remove</button>
+        </div>
+      </div>
+      <button (click)="addDiscipline()" type="button" class="btn btn-primary mt-2">Add Discipline</button>
+
+      <!-- Working Hours in a 3x3 Grid -->
+      <h5 class="mt-4">Radno Vreme (Working Hours)</h5>
+      <div class="row">
+        <!-- Column 1 -->
+        <div class="col-md-4">
+          <!-- Ponedeljak -->
+          <div class="form-group">
+            <label>Ponedeljak (Monday)</label>
+            <div formArrayName="ponedeljak">
+              <div *ngFor="let control of getWorkingHours('ponedeljak').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('ponedeljak', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('ponedeljak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+
+          <!-- Utorak -->
+          <div class="form-group">
+            <label>Utorak (Tuesday)</label>
+            <div formArrayName="utorak">
+              <div *ngFor="let control of getWorkingHours('utorak').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('utorak', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('utorak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+
+          <!-- Sreda -->
+          <div class="form-group">
+            <label>Sreda (Wednesday)</label>
+            <div formArrayName="sreda">
+              <div *ngFor="let control of getWorkingHours('sreda').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('sreda', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('sreda')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="col-md-4">
+          <!-- Cetvrtak -->
+          <div class="form-group">
+            <label>Cetvrtak (Thursday)</label>
+            <div formArrayName="cetvrtak">
+              <div *ngFor="let control of getWorkingHours('cetvrtak').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('cetvrtak', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('cetvrtak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+
+          <!-- Petak -->
+          <div class="form-group">
+            <label>Petak (Friday)</label>
+            <div formArrayName="petak">
+              <div *ngFor="let control of getWorkingHours('petak').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('petak', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('petak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+
+          <!-- Subota -->
+          <div class="form-group">
+            <label>Subota (Saturday)</label>
+            <div formArrayName="subota">
+              <div *ngFor="let control of getWorkingHours('subota').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('subota', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('subota')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Column 3 -->
+        <div class="col-md-4">
+          <!-- Nedelja -->
+          <div class="form-group">
+            <label>Nedelja (Sunday)</label>
+            <div formArrayName="nedelja">
+              <div *ngFor="let control of getWorkingHours('nedelja').controls; let i = index" class="d-flex mb-2">
+                <input [formControlName]="i" class="form-control" placeholder="e.g. 08:00-12:00">
+                <button (click)="removeWorkingHour('nedelja', i)" type="button" class="btn btn-danger ml-2">×</button>
+              </div>
+            </div>
+            <button (click)="addWorkingHour('nedelja')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-success mt-4">🔍 Pretraži sa Filterima (Search with Filters)</button>
+    </form>
+
+    <!-- Display Results -->
+    <div *ngIf="centri.length > 0" class="mt-4">
+      <h3>Rezultati (Results): {{ centri.length }}</h3>
+      <div class="row">
+        <div *ngFor="let centar of centri" class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ centar.ime }}</h5>
+              <p class="card-text">
+                <strong>Opis:</strong> {{ centar.ophis }}<br>
+                <strong>Grad:</strong> {{ centar.grad }}<br>
+                <strong>Adresa:</strong> {{ centar.adresa }}<br>
+                <strong>Ocena:</strong> {{ centar.rating || 'N/A' }}
+              </p>
+              <div class="d-flex justify-content-between">
+                <button (click)="onVidi(centar)" class="btn btn-info">📄 Vidi Detalje</button>
+                <button *ngIf="centar.hasPdf" (click)="downloadPdf(centar.id, $event)" class="btn btn-outline-danger">
+                  📥 Preuzmi PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="centri.length === 0 && !isSearching" class="alert alert-info mt-4">
+      Nije pronađen nijedan objekat. Pokušajte sa drugačijom pretragom.
+    </div>
+
+    <!-- Display Error Messages -->
+    <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+      {{ errorMessage }}
+    </div>
+  </div>

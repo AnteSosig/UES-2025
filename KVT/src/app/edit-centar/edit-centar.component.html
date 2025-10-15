@@ -1,0 +1,137 @@
+<div *ngIf="centarDetails">
+    <h2>Edit Centar: {{ centarDetails.ime }}</h2>
+    <form [formGroup]="editForm" (ngSubmit)="onSubmitEdit()">
+      <div>
+        <label for="ime">Name:</label>
+        <input id="ime" type="text" formControlName="ime">
+      </div>
+  
+      <div>
+        <label for="ophis">Description:</label>
+        <textarea id="ophis" formControlName="ophis"></textarea>
+      </div>
+  
+      <div>
+        <label for="adresa">Address:</label>
+        <input id="adresa" type="text" formControlName="adresa">
+      </div>
+  
+      <div>
+        <label for="grad">City:</label>
+        <input id="grad" type="text" formControlName="grad">
+      </div>
+  
+      <div>
+        <label for="obrisi">Keep:</label>
+        <input id="obrisi" type="checkbox" formControlName="obrisi">
+      </div>
+  
+      <button type="submit" [disabled]="editForm.invalid">Submit</button>
+    </form>
+  
+    <!-- Success or error messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Work Hours Form for RadnoVremeDTO -->
+    <h3>Add Work Hours</h3>
+    <form [formGroup]="workHoursForm" (ngSubmit)="onSubmitWorkHours()">
+      <div>
+        <label for="danNedelje">Day of the Week:</label>
+        <select id="danNedelje" formControlName="danNedelje">
+          <option *ngFor="let day of daysOfWeek" [value]="day">{{ day }}</option>
+        </select>
+      </div>
+  
+      <div>
+        <label for="vremeOtvaranja">Opening Time:</label>
+        <input id="vremeOtvaranja" type="time" formControlName="vremeOtvaranja" required>
+      </div>
+  
+      <div>
+        <label for="vremeZatvaranja">Closing Time:</label>
+        <input id="vremeZatvaranja" type="time" formControlName="vremeZatvaranja" required>
+      </div>
+  
+      <button type="submit" [disabled]="workHoursForm.invalid">Add Work Hours</button>
+    </form>
+  </div>
+  <div *ngIf="centarDetails">
+    <h2>Edit Centar: {{ centarDetails.ime }}</h2>
+    <!-- Edit form code -->
+  
+    <!-- New Section for Disciplina Input -->
+    <h3>Update Disciplines</h3>
+    <form [formGroup]="disciplinaForm" (ngSubmit)="onSubmitDisciplina()">
+      <div>
+        <label for="disciplina">Disciplines (comma-separated):</label>
+        <input id="disciplina" type="text" formControlName="disciplina">
+      </div>
+      <button type="submit" [disabled]="disciplinaForm.invalid">Submit Disciplines</button>
+    </form>
+  
+    <!-- Success or error messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Display Work Hours -->
+    <div class="work-hours-list" *ngIf="currentWorkHours.length > 0">
+      <h4>Postojeća Radna Vremena</h4>
+      <ul>
+        <li *ngFor="let workHour of currentWorkHours">
+          <strong>{{ workHour.danNedelje }}:</strong> 
+          {{ workHour.vremeOtvaranja }} - {{ workHour.vremeZatvaranja }}
+          <button type="button" (click)="deleteWorkHour(workHour.id)" class="btn btn-danger btn-sm ms-2">Obriši</button>
+        </li>
+      </ul>
+    </div>
+  
+    <!-- FILE UPLOAD SECTION -->
+    <h3 style="margin-top: 40px;">Upload Slika i PDF Dokument</h3>
+    
+    <div *ngIf="uploadSuccessMessage" class="alert alert-success">
+      {{ uploadSuccessMessage }}
+    </div>
+    
+    <div *ngIf="uploadErrorMessage" class="alert alert-danger">
+      {{ uploadErrorMessage }}
+    </div>
+  
+    <div>
+      <div>
+        <label for="imageInput">Slika centra (JPG/PNG):</label>
+        <input type="file" id="imageInput" accept="image/jpeg,image/png" (change)="onImageSelected($event)">
+        <small *ngIf="selectedImage" style="color: green;">✓ Izabrana slika: {{ selectedImage.name }}</small>
+      </div>
+  
+      <div style="margin-top: 15px;">
+        <label for="pdfInput">PDF Dokument:</label>
+        <input type="file" id="pdfInput" accept="application/pdf" (change)="onPdfSelected($event)">
+        <small *ngIf="selectedPdf" style="color: green;">✓ Izabran PDF: {{ selectedPdf.name }}</small>
+      </div>
+  
+      <button type="button" (click)="onUploadFiles()" [disabled]="!selectedImage && !selectedPdf" style="margin-top: 15px;">
+        Upload Fajlove
+      </button>
+    </div>
+  
+    <div *ngIf="centarDetails?.imagePath || centarDetails?.pdfPath" style="margin-top: 20px;">
+      <h5>Trenutno postavljeni fajlovi:</h5>
+      <ul>
+        <li *ngIf="centarDetails?.imagePath">
+          Slika: {{ centarDetails.imagePath }}
+        </li>
+        <li *ngIf="centarDetails?.pdfPath">
+          PDF: {{ centarDetails.pdfPath }}
+        </li>
+      </ul>
+    </div>
+  </div>

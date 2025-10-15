@@ -1,0 +1,47 @@
+<div *ngIf="userInfo; else errorTemplate">
+    <h2>Edit Profile</h2>
+    <form [formGroup]="editForm" (ngSubmit)="onSubmitEdit()">
+      <label>Email:</label>
+      <input type="email" formControlName="email" />
+  
+      <label>First Name:</label>
+      <input type="text" formControlName="firstName" />
+  
+      <label>Last Name:</label>
+      <input type="text" formControlName="lastName" />
+  
+      <label>Phone Number:</label>
+      <input type="text" formControlName="brojTelefona" />
+  
+      <label>Address:</label>
+      <input type="text" formControlName="adresa" />
+  
+      <button type="submit" [disabled]="editForm.invalid">Save Profile</button>
+    </form>
+  
+    <p *ngIf="successMessage">{{ successMessage }}</p>
+  
+    <!-- Password change section -->
+    <h2>Change Password</h2>
+    <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+      <label>Password:</label>
+      <input type="password" formControlName="password" />
+  
+      <label>Confirm Password:</label>
+      <input type="password" formControlName="confirmPassword" />
+  
+      <button type="submit" [disabled]="passwordForm.invalid">Save Password</button>
+  
+      <div *ngIf="passwordForm.hasError('mismatch')">
+        <p style="color: red;">Passwords do not match</p>
+      </div>
+    </form>
+  
+    <p *ngIf="passwordSuccessMessage">{{ passwordSuccessMessage }}</p>
+  </div>
+  
+  <!-- Error Template if there's no user data -->
+  <ng-template #errorTemplate>
+    <p>{{ errorMessage }}</p>
+  </ng-template>
+  

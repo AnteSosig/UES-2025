@@ -1,0 +1,52 @@
+<div *ngIf="userInfo; else errorTemplate">
+    <h2>User Profile</h2>
+    <p><strong>Email:</strong> {{ userInfo.email }}</p>
+    <p><strong>First Name:</strong> {{ userInfo.firstName }}</p>
+    <p><strong>Last Name:</strong> {{ userInfo.lastName }}</p>
+    <p><strong>Phone Number:</strong> {{ userInfo.brojTelefona }}</p>
+    <p><strong>Address:</strong> {{ userInfo.adresa }}</p>
+    <p><strong>Birthday:</strong> {{ userInfo.rodjendan | date }}</p>
+    <p><strong>Account Created:</strong> {{ userInfo.createdAt | date }}</p>
+  
+    <!-- Edit Button -->
+    <button (click)="goToEditPage()">Edit</button>
+  
+    <!-- Reservations Table -->
+    <h2>My Reservations</h2>
+    <div *ngIf="reservations.length > 0; else noReservationsTemplate">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Center</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reservation of reservations">
+            <td>{{ reservation.id }}</td>
+            <td>{{ reservation.datum | date }}</td>
+            <td>{{ reservation.pocetak }}</td>
+            <td>{{ reservation.kraj }}</td>
+            <td>{{ reservation.centar }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- No Reservations Template -->
+    <ng-template #noReservationsTemplate>
+      <p>No reservations found</p>
+    </ng-template>
+  
+    <!-- Error message for reservations -->
+    <p *ngIf="reservationErrorMessage">{{ reservationErrorMessage }}</p>
+  </div>
+  
+  <!-- Error Template if there's no user data -->
+  <ng-template #errorTemplate>
+    <p>{{ errorMessage }}</p>
+  </ng-template>
+  

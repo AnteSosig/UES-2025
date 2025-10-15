@@ -1,0 +1,132 @@
+/* Container for the whole section */
+div[ngIf="centarDetails"] {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Heading for the center name */
+  div[ngIf="centarDetails"] h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  /* Subheadings for sections */
+  div[ngIf="centarDetails"] h3 {
+    color: #2980b9;
+    font-size: 22px;
+    margin-top: 20px;
+  }
+  
+  /* Paragraph text */
+  div[ngIf="centarDetails"] p {
+    color: #34495e;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 5px 0;
+  }
+  
+  /* Strong tags for labels */
+  div[ngIf="centarDetails"] strong {
+    color: #e74c3c;
+  }
+  
+  /* List styles for disciplines and working hours */
+  div[ngIf="centarDetails"] ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  div[ngIf="centarDetails"] li {
+    color: #34495e;
+    margin: 5px 0;
+  }
+  
+  /* Button styles */
+  button {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #2ecc71;
+  }
+  
+  /* Reservation form styling */
+  form {
+    margin-top: 20px;
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  form input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  form button[type="submit"] {
+    background-color: #3498db;
+  }
+  
+  form button[type="submit"]:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  /* Success message styling */
+  .alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  
+  /* Error message styling */
+  .alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  
+  /* Loading message styling */
+  div[ngIf="!centarDetails && !errorMessage"] {
+    font-size: 18px;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .flex-col {
+    display: flex;
+    flex-direction: row;
+    gap: 5px; /* Adds spacing between the radio buttons */
+  }
+  
+  .flex-col div {
+    margin: 5px 0;
+  }

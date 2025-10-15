@@ -1,0 +1,73 @@
+<div class="container">
+    <h2>Create New Centar</h2>
+  
+    <form [formGroup]="centarForm" (ngSubmit)="onSubmit()">
+      <!-- Display success and error messages -->
+      <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  
+      <!-- Name field -->
+      <div class="form-group">
+        <label for="ime">Name:</label>
+        <input type="text" id="ime" formControlName="ime" class="form-control" />
+        <div *ngIf="submitted && ime?.invalid" class="text-danger">
+          Name is required
+        </div>
+      </div>
+  
+      <!-- Ophis field -->
+      <div class="form-group">
+        <label for="ophis">Ophis:</label>
+        <input type="text" id="ophis" formControlName="ophis" class="form-control" />
+        <div *ngIf="submitted && ophis?.invalid" class="text-danger">
+          Ophis is required
+        </div>
+      </div>
+  
+      <!-- Address field -->
+      <div class="form-group">
+        <label for="adresa">Address:</label>
+        <input type="text" id="adresa" formControlName="adresa" class="form-control" />
+        <div *ngIf="submitted && adresa?.invalid" class="text-danger">
+          Address is required
+        </div>
+      </div>
+  
+      <!-- City field -->
+      <div class="form-group">
+        <label for="grad">City:</label>
+        <input type="text" id="grad" formControlName="grad" class="form-control" />
+        <div *ngIf="submitted && grad?.invalid" class="text-danger">
+          City is required
+        </div>
+      </div>
+  
+      <!-- Discipline field -->
+      <div class="form-group">
+        <label for="discipline">Disciplines (comma-separated):</label>
+        <input type="text" id="discipline" formControlName="discipline" class="form-control" />
+        <div *ngIf="submitted && discipline?.invalid" class="text-danger">
+          At least one discipline is required
+        </div>
+      </div>
+  
+      <!-- FILE UPLOAD FIELDS -->
+      <h4 style="margin-top: 30px;">Opcionalno: Upload Slika i PDF</h4>
+      
+      <div class="form-group">
+        <label for="imageInput">Slika centra (JPG/PNG):</label>
+        <input type="file" id="imageInput" accept="image/jpeg,image/png" (change)="onImageSelected($event)" class="form-control" />
+        <small *ngIf="selectedImage" style="color: green;">✓ Izabrana slika: {{ selectedImage.name }}</small>
+      </div>
+  
+      <div class="form-group">
+        <label for="pdfInput">PDF Dokument:</label>
+        <input type="file" id="pdfInput" accept="application/pdf" (change)="onPdfSelected($event)" class="form-control" />
+        <small *ngIf="selectedPdf" style="color: green;">✓ Izabran PDF: {{ selectedPdf.name }}</small>
+      </div>
+  
+      <!-- Submit button -->
+      <button type="submit" class="btn btn-primary">Create Centar</button>
+    </form>
+  </div>
+  

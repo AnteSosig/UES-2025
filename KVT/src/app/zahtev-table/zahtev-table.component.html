@@ -1,0 +1,38 @@
+<div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <table class="table table-bordered" *ngIf="zahtevi.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Address</th>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone</th>
+        <th>Birthday</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let zahtev of zahtevi">
+        <td>{{ zahtev.id }}</td>
+        <td>{{ zahtev.address }}</td>
+        <td>{{ zahtev.email }}</td>
+        <td>{{ zahtev.firstName }}</td>
+        <td>{{ zahtev.lastName }}</td>
+        <td>{{ zahtev.numTel }}</td>
+        <td>{{ zahtev.birthday | date:'yyyy-MM-dd' }}</td>
+        <td>{{ zahtev.status }}</td>
+        <td *ngIf="zahtev.status === 'PENDING'">
+          <button (click)="acceptRequest(zahtev.id)" class="btn btn-success">Accept</button>
+          <button (click)="rejectRequest(zahtev.id)" class="btn btn-danger">Reject</button>
+        </td>
+        <td *ngIf="zahtev.status !== 'PENDING'">
+          <span>{{ zahtev.status }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
