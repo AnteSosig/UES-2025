@@ -23,4 +23,7 @@ public class CentarDTO2 {
     public Double rating;
     public List<RadnoVremeDTO> radnoVremeDTOList;
     public List<String> discipline;
+    public String imagePath;
+    public String pdfPath;
+    public Boolean hasPdf;
 }

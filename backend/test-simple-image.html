@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Image Test</title>
+</head>
+<body>
+    <h1>Simple Image Test - NO AUTH REQUIRED</h1>
+    
+    <h2>Test 1: Direct IMG tag (should work now)</h2>
+    <p>This should display the image if the endpoint is public:</p>
+    <img src="http://localhost:8080/api/centri/2/image" alt="Center 2 Image" style="max-width: 500px; border: 2px solid blue;" />
+    
+    <h2>Test 2: Check Response</h2>
+    <button onclick="checkEndpoint()">Check Image Endpoint</button>
+    <div id="result"></div>
+    
+    <script>
+        async function checkEndpoint() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('http://localhost:8080/api/centri/2/image');
+                result.innerHTML = `
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Content-Type:</strong> ${response.headers.get('content-type')}</p>
+                    <p><strong>Success:</strong> ${response.ok ? '✅ YES' : '❌ NO'}</p>
+                `;
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    result.innerHTML += `<p>✅ Image loaded successfully!</p><img src="${url}" style="max-width: 300px;" />`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

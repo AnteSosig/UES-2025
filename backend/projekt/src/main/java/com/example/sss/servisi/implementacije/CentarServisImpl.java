@@ -154,8 +154,15 @@ public class CentarServisImpl implements CentarServis {
     @Override
     public List<CentarDocument> searchAll(String query) {
         log.debug("Searching centers by all fields: {}", query);
-        return elasticsearchRepository.findByImeContainingOrOpisContainingOrPdfContentContaining(
-                query, query, query);
+        try {
+            // Use custom query with Serbian analyzer
+            return elasticsearchRepository.searchByQuery(query);
+        } catch (Exception e) {
+            log.error("Error searching with custom query, falling back to basic search", e);
+            // Fallback to basic search if custom query fails
+            return elasticsearchRepository.findByImeContainingOrOpisContainingOrPdfContentContaining(
+                    query, query, query);
+        }
     }
 
     @Override

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/centri")
-@CrossOrigin(origins = "*")
 public class CentarKontroler {
 
     @Autowired
@@ -409,6 +408,18 @@ public class CentarKontroler {
                     centarDTO.discipline.add(dostupnost.getDisciplina().ime);
                 }
 
+                // Add image and PDF URLs
+                if (centar.getImagePath() != null && !centar.getImagePath().isEmpty()) {
+                    centarDTO.setImagePath("/api/centri/" + centar.getId() + "/image");
+                }
+                
+                if (centar.getPdfPath() != null && !centar.getPdfPath().isEmpty()) {
+                    centarDTO.setPdfPath("/api/centri/" + centar.getId() + "/pdf");
+                    centarDTO.setHasPdf(true);
+                } else {
+                    centarDTO.setHasPdf(false);
+                }
+
                 return new ResponseEntity<>(centarDTO, HttpStatus.OK);
             }
         }
@@ -443,6 +454,16 @@ public class CentarKontroler {
                             .collect(Collectors.toList());
                     for (Integer i : disciplineIds) {
                         dostupnostRepozitorijum.insert(sui, i);
+                    }
+
+                    // Index the newly created center in Elasticsearch
+                    try {
+                        Centar newCentar = centarRepozitorijum.findById(sui);
+                        if (newCentar != null) {
+                            centarServis.indexCentar(newCentar);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Failed to index new center: " + e.getMessage());
                     }
 
                     return new ResponseEntity<>(null, HttpStatus.OK);
@@ -527,6 +548,16 @@ public class CentarKontroler {
                         }
                         if (obrisi != null) {
                             centarRepozitorijum.obrisi(Boolean.parseBoolean(obrisi), centar.getId());
+                        }
+
+                        // Re-index the updated center in Elasticsearch
+                        try {
+                            Centar updatedCentar = centarRepozitorijum.findById(centar.getId());
+                            if (updatedCentar != null) {
+                                centarServis.indexCentar(updatedCentar);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Failed to re-index updated center: " + e.getMessage());
                         }
 
                         return new ResponseEntity<>(null, HttpStatus.OK);
@@ -835,25 +866,7 @@ public class CentarKontroler {
     }
 
     @GetMapping("/{id}/image")
-    public ResponseEntity<?> getImage(
-            @PathVariable Integer id,
-            @RequestHeader("authorization") String token) {
-
-        String email = null;
-        try {
-            email = tokenUtils.getClaimsFromToken(token).getSubject();
-        } catch (Exception ignored) {
-        }
-
-        if (email == null) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
-        }
-
-        Korisnik korisnik = korisnikRepozitorijum.findByEmail(email);
-        if (korisnik == null || !korisnik.isActive()) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
-        }
-
+    public ResponseEntity<?> getImage(@PathVariable Integer id) {
         try {
             Centar centar = centarRepozitorijum.findById(id);
             if (centar == null || centar.getImagePath() == null) {

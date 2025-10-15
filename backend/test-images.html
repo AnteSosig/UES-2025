@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Images & PDFs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { border: 1px solid #ccc; padding: 15px; margin: 10px 0; }
+        img { max-width: 300px; border: 1px solid #ddd; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Image & PDF Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Image URL</h2>
+        <p>This tests if the image endpoint works:</p>
+        <p>URL: <code>http://localhost:8080/api/centri/2/image</code></p>
+        <p><strong>Note:</strong> You need to be logged in and have a valid token</p>
+        <button onclick="testImageEndpoint()">Test Image Endpoint</button>
+        <div id="imageResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Get Center Data</h2>
+        <p>Check what data the API returns:</p>
+        <button onclick="getCenterData()">Get Center 2 Data</button>
+        <pre id="centerData"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Search Centers</h2>
+        <input type="text" id="searchQuery" placeholder="Enter search term (e.g., 'biber')" value="biber" />
+        <button onclick="searchCenters()">Search</button>
+        <pre id="searchResults"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Upload PDF</h2>
+        <p>Center ID: <input type="number" id="uploadCenterId" value="2" /></p>
+        <p>PDF File: <input type="file" id="pdfFile" accept="application/pdf" /></p>
+        <p>Image File: <input type="file" id="imageFile" accept="image/*" /></p>
+        <button onclick="uploadFiles()">Upload Files</button>
+        <div id="uploadResult"></div>
+    </div>
+
+    <script>
+        // You need to set your auth token here
+        const AUTH_TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrbUBrbS5rbSIsImlhdCI6MTc2MDU2NDAwOSwiZXhwIjoxNzYwNTY0MzA5fQ.wNDR4J50STRnRhaQqsr3rjeaU_qb7wxCHe4tQHtFxKEK1WVnBW6uITDSP1mW1M681s0L2prh4GQSkopkW3l1Sw';
+
+        async function testImageEndpoint() {
+            const result = document.getElementById('imageResult');
+            try {
+                const response = await fetch('http://localhost:8080/api/centri/2/image', {
+                    headers: {
+                        'Authorization': AUTH_TOKEN
+                    }
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imgUrl = URL.createObjectURL(blob);
+                    result.innerHTML = `<p class="success">✅ Image loaded successfully!</p><img src="${imgUrl}" alt="Center Image" />`;
+                } else {
+                    result.innerHTML = `<p class="error">❌ Error: ${response.status} - ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function getCenterData() {
+            const result = document.getElementById('centerData');
+            try {
+                const response = await fetch('http://localhost:8080/api/centri/2', {
+                    headers: {
+                        'Authorization': AUTH_TOKEN
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    result.textContent = `Error: ${response.status} - ${response.statusText}`;
+                }
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function searchCenters() {
+            const query = document.getElementById('searchQuery').value;
+            const result = document.getElementById('searchResults');
+            try {
+                const response = await fetch(`http://localhost:8080/api/centri/search?query=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Authorization': AUTH_TOKEN
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    result.textContent = `Error: ${response.status} - ${response.statusText}`;
+                }
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function uploadFiles() {
+            const centerId = document.getElementById('uploadCenterId').value;
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            const imageFile = document.getElementById('imageFile').files[0];
+            const result = document.getElementById('uploadResult');
+
+            if (!pdfFile && !imageFile) {
+                result.innerHTML = '<p class="error">Please select at least one file</p>';
+                return;
+            }
+
+            const formData = new FormData();
+            if (imageFile) formData.append('image', imageFile);
+            if (pdfFile) formData.append('pdf', pdfFile);
+
+            try {
+                result.innerHTML = '<p>Uploading...</p>';
+                const response = await fetch(`http://localhost:8080/api/centri/${centerId}/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': AUTH_TOKEN
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `<p class="success">✅ Upload successful!</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const errorText = await response.text();
+                    result.innerHTML = `<p class="error">❌ Error: ${response.status} - ${errorText}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+
+    <hr />
+    <p><strong>Instructions:</strong></p>
+    <ol>
+        <li>Open browser developer tools (F12)</li>
+        <li>Login to your app and copy the Authorization token from a successful request</li>
+        <li>Replace 'YOUR_AUTH_TOKEN_HERE' in the script above with your actual token</li>
+        <li>Reload this page and test the endpoints</li>
+    </ol>
+</body>
+</html>

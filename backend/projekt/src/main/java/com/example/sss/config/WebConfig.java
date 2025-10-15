@@ -14,10 +14,17 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:4200", "http://localhost:3000", "*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                        // Specify allowed origins explicitly (more secure than wildcard with credentials)
+                        .allowedOriginPatterns(
+                            "http://localhost:4200",
+                            "http://localhost:3000", 
+                            "http://127.0.0.1:4200",
+                            "http://127.0.0.1:3000"
+                        )
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                         .allowedHeaders("*")
-                        .allowCredentials(false)
+                        .exposedHeaders("Content-Type", "Content-Disposition", "Authorization", "X-Total-Count")
+                        .allowCredentials(true)
                         .maxAge(3600);
             }
         };

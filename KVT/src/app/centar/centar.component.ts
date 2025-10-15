@@ -184,4 +184,13 @@ export class CentarComponent implements OnInit {
       }
     });
   }
+
+  // Get proper image URL
+  getImageUrl(imagePath: string): string {
+    if (!imagePath) {
+      return '';
+    }
+    // Just return the API URL - no auth needed now
+    return `http://localhost:8080/api/centri/${this.centarId}/image`;
+  }
 }

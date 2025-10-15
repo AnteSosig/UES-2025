@@ -10,18 +10,31 @@
   <div style="margin-top: 20px; margin-bottom: 20px;">
     <h3>Mediji</h3>
     
+    <!-- DEBUG: Show raw center data -->
+    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 15px; font-size: 12px;">
+      <strong>DEBUG - Center Data:</strong><br>
+      imagePath: {{ centarDetails.imagePath || 'NULL/UNDEFINED' }}<br>
+      pdfPath: {{ centarDetails.pdfPath || 'NULL/UNDEFINED' }}<br>
+      hasPdf: {{ centarDetails.hasPdf }}<br>
+      Center ID: {{ centarId }}<br>
+      <pre style="font-size: 10px; max-height: 200px; overflow: auto;">{{ centarDetails | json }}</pre>
+    </div>
+    
     <!-- Display Image if available -->
     <div *ngIf="centarDetails.imagePath" style="margin-bottom: 15px;">
       <h5>Slika centra:</h5>
-      <img [src]="'http://localhost:9000/sportski-centri-images/' + centarDetails.imagePath" 
+      <p style="font-size: 12px; color: #666;">
+        Debug - imagePath: {{ centarDetails.imagePath }}<br>
+        Debug - imageUrl: {{ getImageUrl(centarDetails.imagePath) }}
+      </p>
+      <img [src]="getImageUrl(centarDetails.imagePath)" 
            alt="Centar Image" 
            style="max-width: 500px; border: 1px solid #ccc; border-radius: 8px;">
     </div>
 
     <!-- Display PDF download if available -->
-    <div *ngIf="centarDetails.pdfPath">
+    <div *ngIf="centarDetails.pdfPath || centarDetails.hasPdf">
       <h5>PDF Dokument:</h5>
-      <p>{{ centarDetails.pdfPath }}</p>
       <button (click)="downloadPdf()" class="btn btn-primary">
         <i class="bi bi-download"></i> Download PDF
       </button>
@@ -30,7 +43,7 @@
       </div>
     </div>
 
-    <div *ngIf="!centarDetails.imagePath && !centarDetails.pdfPath">
+    <div *ngIf="!centarDetails.imagePath && !centarDetails.pdfPath && !centarDetails.hasPdf">
       <p style="color: #999;">Nema postavljenih medija za ovaj centar.</p>
     </div>
   </div>
