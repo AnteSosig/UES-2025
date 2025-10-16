@@ -12,7 +12,7 @@
               id="query" 
               class="form-control form-control-lg" 
               type="text" 
-              placeholder="Unesite tekst za pretragu (latinica ili ćirilica)..."
+              placeholder="Unesite tekst za pretragu..."
               (keyup.enter)="onSearchUnified()">
             <div class="input-group-append">
               <button (click)="onSearchUnified()" type="button" class="btn btn-primary btn-lg">
@@ -21,9 +21,6 @@
               </button>
             </div>
           </div>
-          <small class="form-text text-muted">
-            Pretraga pretražuje nazive, opise i sadržaj PDF dokumenata. Podržava latinično i ćirilično pismo.
-          </small>
         </div>
       </form>
     </div>
@@ -31,13 +28,13 @@
     <!-- Toggle Advanced Search -->
     <div class="mb-3">
       <button (click)="toggleAdvancedSearch()" type="button" class="btn btn-secondary">
-        {{ showAdvancedSearch ? '▲ Sakrij naprednu pretragu' : '▼ Prikaži naprednu pretragu' }}
+        {{ showAdvancedSearch ? '▲ Sakrij staru pretragu' : '▼ Prikaži staru pretragu' }}
       </button>
     </div>
 
     <!-- ADVANCED SEARCH FORM (Collapsible) -->
     <form [formGroup]="searchForm" (ngSubmit)="onSubmitAdvanced()" *ngIf="showAdvancedSearch" class="advanced-search">
-      <h4 class="mt-4">Napredna Pretraga (Advanced Search)</h4>
+      <h4 class="mt-4">Stara Pretraga</h4>
 
       <!-- City -->
       <div class="form-group">

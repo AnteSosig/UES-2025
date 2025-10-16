@@ -497,24 +497,27 @@ public class CentarKontroler {
                         if ((image != null && !image.isEmpty()) || (pdf != null && !pdf.isEmpty())) {
                             log.info("Uploading files for centar ID: {}", sui);
                             centarServis.uploadFiles(sui, image, pdf);
-                            log.info("Files uploaded successfully for centar ID: {}", sui);
+                            log.info("Files uploaded successfully and indexed in Elasticsearch for centar ID: {}", sui);
                         } else {
-                            log.info("No files to upload for centar ID: {}", sui);
+                            log.info("No files to upload for centar ID: {}, indexing basic info only", sui);
+                            // Index center without files
+                            Centar newCentar = centarRepozitorijum.findById(sui);
+                            if (newCentar != null) {
+                                centarServis.indexCentar(newCentar);
+                                log.info("Centar indexed successfully in Elasticsearch: {}", sui);
+                            }
                         }
                     } catch (Exception e) {
-                        log.error("Failed to upload files for new center: " + e.getMessage(), e);
-                        // Continue even if file upload fails - files can be added later
-                    }
-
-                    // Index the newly created center in Elasticsearch (with or without files)
-                    try {
-                        Centar newCentar = centarRepozitorijum.findById(sui);
-                        if (newCentar != null) {
-                            centarServis.indexCentar(newCentar);
-                            log.info("Centar indexed successfully in Elasticsearch: {}", sui);
+                        log.error("Failed to upload files or index center: " + e.getMessage(), e);
+                        // Try to index basic info even if file upload fails
+                        try {
+                            Centar newCentar = centarRepozitorijum.findById(sui);
+                            if (newCentar != null) {
+                                centarServis.indexCentar(newCentar);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Failed to index center after file upload error", ex);
                         }
-                    } catch (Exception e) {
-                        log.error("Failed to index new center: " + e.getMessage(), e);
                     }
 
                     return new ResponseEntity<>(null, HttpStatus.OK);

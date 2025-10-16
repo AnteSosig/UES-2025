@@ -50,6 +50,10 @@
       "serbian_stop": {
         "type": "stop",
         "stopwords": "_serbian_"
+      },
+      "serbian_stemmer": {
+        "type": "stemmer",
+        "language": "serbian"
       }
     },
     "analyzer": {
@@ -71,7 +75,8 @@
         ],
         "tokenizer": "ngram_tokenizer",
         "filter": [
-          "lowercase"
+          "lowercase",
+          "serbian_stemmer"
         ]
       },
       "serbian_search_analyzer": {
@@ -81,7 +86,8 @@
         ],
         "tokenizer": "standard",
         "filter": [
-          "lowercase"
+          "lowercase",
+          "serbian_stemmer"
         ]
       }
     }
