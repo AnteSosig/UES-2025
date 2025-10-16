@@ -46,7 +46,4 @@ public class Centar {
 
     @Column
     private String pdfPath;
-
-    @Column(length = 10000)
-    private String pdfContent;
 }

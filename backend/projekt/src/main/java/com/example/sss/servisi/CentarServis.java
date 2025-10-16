@@ -17,6 +17,8 @@ public interface CentarServis {
 
     void indexCentar(Centar centar);
 
+    void indexCentar(Centar centar, String pdfContent);
+
     void indexAllCentri();
 
     List<CentarDocument> searchByNaziv(String naziv);

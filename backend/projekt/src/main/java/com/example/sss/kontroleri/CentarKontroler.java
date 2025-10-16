@@ -8,6 +8,7 @@ import com.example.sss.servisi.CentarServis;
 import com.example.sss.servisi.DostupnostServis;
 import com.example.sss.servisi.RadnoVremeServis;
 import com.example.sss.servisi.TokenUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/centri")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:3000"}, 
+             allowedHeaders = "*", 
+             methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class CentarKontroler {
 
     @Autowired
@@ -428,14 +434,40 @@ public class CentarKontroler {
     }
 
     @PostMapping("/novicentar")
-    public ResponseEntity<CentarDTO> createCentar(@RequestBody @Validated CentarDTO2 centarDTO, @RequestHeader("authorization") String token) {
+    public ResponseEntity<CentarDTO> createCentar(
+            HttpServletRequest request,
+            @RequestParam(value = "ime", required = false) String ime,
+            @RequestParam(value = "ophis", required = false) String ophis,
+            @RequestParam(value = "adresa", required = false) String adresa,
+            @RequestParam(value = "grad", required = false) String grad,
+            @RequestParam(value = "discipline", required = false) List<String> discipline,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "pdf", required = false) MultipartFile pdf,
+            @RequestHeader("authorization") String token) {
+
+        log.info("=== CREATE CENTAR REQUEST ===");
+        log.info("Content-Type: {}", request.getContentType());
+        log.info("Method: {}", request.getMethod());
+        log.info("Parameter names: {}", Collections.list(request.getParameterNames()));
+        log.info("ime: {}", ime);
+        log.info("ophis: {}", ophis);
+        log.info("adresa: {}", adresa);
+        log.info("grad: {}", grad);
+        log.info("discipline: {}", discipline);
+        log.info("Files provided - Image: {}, PDF: {}", image != null && !image.isEmpty(), pdf != null && !pdf.isEmpty());
+        
+        // Validate required fields
+        if (ime == null || ophis == null || adresa == null || grad == null || discipline == null || discipline.isEmpty()) {
+            log.error("Missing required fields!");
+            return ResponseEntity.badRequest().build();
+        }
 
         String email = null;
         try {
             email = tokenUtils.getClaimsFromToken(token).getSubject();
         }
-        catch (Exception ignored){
-
+        catch (Exception e){
+            log.error("Error extracting email from token", e);
         }
 
         if(email != null) {
@@ -443,11 +475,15 @@ public class CentarKontroler {
 
             if (korisnik != null && korisnik.isActive()) {
                 if (korisnik.getRole() == enumRole.ADMIN) {
-                    centarRepozitorijum.insert(centarDTO.ime, centarDTO.ophis, LocalDateTime.now(), centarDTO.adresa, centarDTO.grad);
+                    // Create the center in database
+                    centarRepozitorijum.insert(ime, ophis, LocalDateTime.now(), adresa, grad);
                     int sui = centarRepozitorijum.getLastInsertedId();
-                    List<Disciplina> pretragaDisciplina = disciplinaRepozitorijum.nadjiDiscipline(centarDTO.discipline);
+                    log.info("Centar created with ID: {}", sui);
+                    
+                    // Add disciplines
+                    List<Disciplina> pretragaDisciplina = disciplinaRepozitorijum.nadjiDiscipline(discipline);
                     for (Disciplina disciplina : pretragaDisciplina) {
-                        System.out.println(disciplina.ime);
+                        log.debug("Adding disciplina: {}", disciplina.ime);
                     }
                     List<Integer> disciplineIds = pretragaDisciplina.stream()
                             .map(Disciplina::getId)
@@ -456,14 +492,29 @@ public class CentarKontroler {
                         dostupnostRepozitorijum.insert(sui, i);
                     }
 
-                    // Index the newly created center in Elasticsearch
+                    // Upload files to MinIO if provided
+                    try {
+                        if ((image != null && !image.isEmpty()) || (pdf != null && !pdf.isEmpty())) {
+                            log.info("Uploading files for centar ID: {}", sui);
+                            centarServis.uploadFiles(sui, image, pdf);
+                            log.info("Files uploaded successfully for centar ID: {}", sui);
+                        } else {
+                            log.info("No files to upload for centar ID: {}", sui);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to upload files for new center: " + e.getMessage(), e);
+                        // Continue even if file upload fails - files can be added later
+                    }
+
+                    // Index the newly created center in Elasticsearch (with or without files)
                     try {
                         Centar newCentar = centarRepozitorijum.findById(sui);
                         if (newCentar != null) {
                             centarServis.indexCentar(newCentar);
+                            log.info("Centar indexed successfully in Elasticsearch: {}", sui);
                         }
                     } catch (Exception e) {
-                        System.out.println("Failed to index new center: " + e.getMessage());
+                        log.error("Failed to index new center: " + e.getMessage(), e);
                     }
 
                     return new ResponseEntity<>(null, HttpStatus.OK);
@@ -471,6 +522,7 @@ public class CentarKontroler {
             }
         }
 
+        log.warn("Unauthorized attempt to create centar");
         return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
     }
 
@@ -797,33 +849,42 @@ public class CentarKontroler {
     @PostMapping("/{id}/upload")
     public ResponseEntity<?> uploadFiles(
             @PathVariable Integer id,
-            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
-            @RequestParam(value = "pdf", required = false) org.springframework.web.multipart.MultipartFile pdf,
-            @RequestHeader("authorization") String token) {
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "pdf", required = false) MultipartFile pdf,
+            @RequestHeader(value = "authorization", required = false) String token) {
+
+        log.info("Upload request received for centar ID: {}", id);
+        log.info("Image present: {}, PDF present: {}", image != null && !image.isEmpty(), pdf != null && !pdf.isEmpty());
 
         String email = null;
         try {
             email = tokenUtils.getClaimsFromToken(token).getSubject();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.error("Error extracting email from token", e);
         }
 
         if (email == null) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            log.warn("No email found in token");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Authentication required");
         }
 
         Korisnik korisnik = korisnikRepozitorijum.findByEmail(email);
         if (korisnik == null || !korisnik.isActive()) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            log.warn("User not found or inactive: {}", email);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not authorized");
         }
 
         if (korisnik.getRole() != enumRole.ADMIN) {
-            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+            log.warn("User {} is not admin", email);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Admin access required");
         }
 
         try {
             Centar updatedCentar = centarServis.uploadFiles(id, image, pdf);
+            log.info("Files uploaded successfully for centar ID: {}", id);
             return ResponseEntity.ok(updatedCentar);
         } catch (Exception e) {
+            log.error("Error uploading files for centar ID: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error uploading files: " + e.getMessage());
         }

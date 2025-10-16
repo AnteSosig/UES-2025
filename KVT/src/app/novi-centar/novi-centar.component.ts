@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   templateUrl: './novi-centar.component.html',
   styleUrls: ['./novi-centar.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class NoviCentarComponent {
   centarForm: FormGroup;
@@ -20,7 +20,6 @@ export class NoviCentarComponent {
   // File upload fields
   selectedImage: File | null = null;
   selectedPdf: File | null = null;
-  createdCentarId: number | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.centarForm = this.fb.group({
@@ -59,67 +58,43 @@ export class NoviCentarComponent {
       return;
     }
 
-    const formData = {
-      id: null,
-      ime: this.centarForm.value.ime,
-      ophis: this.centarForm.value.ophis,
-      adresa: this.centarForm.value.adresa,
-      grad: this.centarForm.value.grad,
-      datumKreacije: null,
-      rating: null,
-      radnoVremeDTOList: [],
-      discipline: this.centarForm.value.discipline.split(',').map((d: string) => d.trim())
-    };
+    // Create FormData for multipart/form-data request
+    const formData = new FormData();
+    formData.append('ime', this.centarForm.value.ime);
+    formData.append('ophis', this.centarForm.value.ophis);
+    formData.append('adresa', this.centarForm.value.adresa);
+    formData.append('grad', this.centarForm.value.grad);
+    
+    // Add disciplines as separate entries
+    const disciplines = this.centarForm.value.discipline.split(',').map((d: string) => d.trim());
+    disciplines.forEach((discipline: string) => {
+      formData.append('discipline', discipline);
+    });
+
+    // Add files if selected
+    if (this.selectedImage) {
+      formData.append('image', this.selectedImage);
+    }
+    if (this.selectedPdf) {
+      formData.append('pdf', this.selectedPdf);
+    }
 
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
-      'Authorization': token || '',
-      'Content-Type': 'application/json'
+      'Authorization': token || ''
+      // Don't set Content-Type - let browser set it with boundary for multipart/form-data
     });
 
     this.http.post<any>('http://localhost:8080/api/centri/novicentar', formData, { headers })
       .subscribe({
-        next: (response) => {
-          this.successMessage = 'Centar successfully created!';
+        next: (response: any) => {
+          this.successMessage = 'Centar successfully created with all files!';
           this.errorMessage = '';
-          this.createdCentarId = response.id;
-
-          // If files are selected, upload them
-          if ((this.selectedImage || this.selectedPdf) && this.createdCentarId) {
-            this.uploadFiles(this.createdCentarId);
-          } else {
-            // Reset form if no files to upload
-            this.centarForm.reset();
-            this.submitted = false;
-          }
-        },
-        error: (err) => {
-          this.errorMessage = `Failed to create centar: ${err.message}`;
-          this.successMessage = '';
-        }
-      });
-  }
-
-  uploadFiles(centarId: number) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('authorization', token || '');
-    const uploadFormData = new FormData();
-
-    if (this.selectedImage) {
-      uploadFormData.append('image', this.selectedImage);
-    }
-    if (this.selectedPdf) {
-      uploadFormData.append('pdf', this.selectedPdf);
-    }
-
-    this.http.post(`http://localhost:8080/api/centri/${centarId}/upload`, uploadFormData, { headers })
-      .subscribe({
-        next: () => {
-          this.successMessage += ' Files uploaded successfully!';
           this.resetForm();
         },
-        error: (err) => {
-          this.errorMessage = `Centar created but file upload failed: ${err.message}`;
+        error: (err: any) => {
+          this.errorMessage = `Failed to create centar: ${err.message}`;
+          this.successMessage = '';
         }
       });
   }
@@ -129,7 +104,6 @@ export class NoviCentarComponent {
     this.submitted = false;
     this.selectedImage = null;
     this.selectedPdf = null;
-    this.createdCentarId = null;
     
     // Reset file inputs
     const imageInput = document.getElementById('imageInput') as HTMLInputElement;

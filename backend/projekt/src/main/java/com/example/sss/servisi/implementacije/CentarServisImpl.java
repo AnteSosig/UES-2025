@@ -55,6 +55,8 @@ public class CentarServisImpl implements CentarServis {
             throw new RuntimeException("Center not found with id: " + centarId);
         }
 
+        String pdfContent = null;
+
         try {
             // Upload image if provided
             if (image != null && !image.isEmpty()) {
@@ -69,9 +71,8 @@ public class CentarServisImpl implements CentarServis {
                     throw new RuntimeException("Invalid PDF file");
                 }
 
-                // Extract text from PDF
-                String pdfContent = pdfParserService.extractTextFromPdf(pdf);
-                centar.setPdfContent(pdfContent);
+                // Extract text from PDF (will be stored in Elasticsearch only)
+                pdfContent = pdfParserService.extractTextFromPdf(pdf);
 
                 // Upload PDF to MinIO
                 String pdfPath = minioService.uploadFile(pdf, "pdfs");
@@ -81,11 +82,11 @@ public class CentarServisImpl implements CentarServis {
                 log.info("PDF content extracted, length: {} characters", pdfContent.length());
             }
 
-            // Save updated center
+            // Save updated center (without pdfContent - that goes only to Elasticsearch)
             Centar updatedCentar = centarRepozitorijum.save(centar);
 
-            // Update Elasticsearch index
-            indexCentar(updatedCentar);
+            // Update Elasticsearch index with PDF content
+            indexCentar(updatedCentar, pdfContent);
 
             return updatedCentar;
 
@@ -96,7 +97,7 @@ public class CentarServisImpl implements CentarServis {
     }
 
     @Override
-    public void indexCentar(Centar centar) {
+    public void indexCentar(Centar centar, String pdfContent) {
         try {
             CentarDocument document = new CentarDocument();
             document.setId(centar.getId());
@@ -109,7 +110,11 @@ public class CentarServisImpl implements CentarServis {
             document.setActive(centar.isActive());
             document.setImagePath(centar.getImagePath());
             document.setPdfPath(centar.getPdfPath());
-            document.setPdfContent(centar.getPdfContent());
+            
+            // Set PDF content only in Elasticsearch (not stored in MySQL)
+            if (pdfContent != null && !pdfContent.isEmpty()) {
+                document.setPdfContent(pdfContent);
+            }
 
             elasticsearchRepository.save(document);
             log.info("Center {} indexed successfully in Elasticsearch", centar.getId());
@@ -117,6 +122,12 @@ public class CentarServisImpl implements CentarServis {
             log.error("Error indexing center {} in Elasticsearch", centar.getId(), e);
             throw new RuntimeException("Error indexing center", e);
         }
+    }
+
+    @Override
+    public void indexCentar(Centar centar) {
+        // When called without pdfContent, just index basic info (no PDF content)
+        indexCentar(centar, null);
     }
 
     @Override
