@@ -75,16 +75,24 @@ export class HomeComponent implements OnInit {
 
   // Unified search method
   onSearchUnified(): void {
+    console.log('=== onSearchUnified called ===');
     const token = this.getToken();
-    if (!token) return;
+    if (!token) {
+      console.log('No token found');
+      return;
+    }
 
     const query = this.searchForm.value.query;
+    console.log('Search query:', query);
+    
     if (!query || query.trim() === '') {
       // If search is empty, show all centers using advanced search
+      console.log('Query is empty, calling onSubmitAdvanced');
       this.onSubmitAdvanced();
       return;
     }
 
+    console.log('Calling unifiedSearch with query:', query);
     this.isSearching = true;
     this.unifiedSearch(query, token).subscribe({
       next: (data: CentarDTO[]) => {
@@ -95,7 +103,7 @@ export class HomeComponent implements OnInit {
       error: (error) => {
         this.errorMessage = 'An error occurred while searching.';
         this.isSearching = false;
-        console.error(error);
+        console.error('Search error:', error);
       }
     });
   }
@@ -103,6 +111,8 @@ export class HomeComponent implements OnInit {
   // Unified search API call
   unifiedSearch(query: string, token: string): Observable<CentarDTO[]> {
     let params = new HttpParams().set('query', query);
+    console.log('unifiedSearch - query param:', query);
+    console.log('unifiedSearch - full URL:', this.searchApiUrl + '?query=' + query);
     
     const headers = new HttpHeaders({
       Authorization: `${token}`

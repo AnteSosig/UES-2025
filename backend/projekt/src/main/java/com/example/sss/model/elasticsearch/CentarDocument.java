@@ -9,11 +9,13 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
+import org.springframework.data.elasticsearch.annotations.Mapping;
 
 import java.util.Date;
 
 @Document(indexName = "centri")
 @Setting(settingPath = "elasticsearch-settings.json")
+@Mapping(mappingPath = "elasticsearch-mappings.json")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,10 +25,12 @@ public class CentarDocument {
     @Id
     private Integer id;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
+    // Multi-field will be defined in elasticsearch-mappings.json
+    @Field(type = FieldType.Text)
     private String ime;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
+    // Multi-field will be defined in elasticsearch-mappings.json
+    @Field(type = FieldType.Text)
     private String opis;
 
     @Field(type = FieldType.Date)
@@ -50,6 +54,7 @@ public class CentarDocument {
     @Field(type = FieldType.Text)
     private String pdfPath;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
+    // Multi-field will be defined in elasticsearch-mappings.json
+    @Field(type = FieldType.Text)
     private String pdfContent;
 }

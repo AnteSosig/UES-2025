@@ -1002,6 +1002,9 @@ public class CentarKontroler {
             @RequestParam("query") String query,
             @RequestHeader("authorization") String token) {
 
+        log.info("========== SEARCH ENDPOINT CALLED ==========");
+        log.info("Query parameter: {}", query);
+
         String email = null;
         try {
             email = tokenUtils.getClaimsFromToken(token).getSubject();
@@ -1009,17 +1012,23 @@ public class CentarKontroler {
         }
 
         if (email == null) {
+            log.warn("Token invalid or expired - returning 403");
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
 
         Korisnik korisnik = korisnikRepozitorijum.findByEmail(email);
         if (korisnik == null || !korisnik.isActive()) {
+            log.warn("User not found or inactive - returning 403");
             return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
         }
 
+        log.info("User authenticated: {}", email);
+
         try {
+            log.info("Calling centarServis.searchAll() with query: {}", query);
             // Search across all fields using Elasticsearch
             List<CentarDocument> searchResults = centarServis.searchAll(query);
+            log.info("Search returned {} results", searchResults.size());
 
             // Convert to DTOs
             List<CentarDTO> centarDTOS = new ArrayList<>();

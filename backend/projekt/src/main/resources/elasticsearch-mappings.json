@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "id": {
+      "type": "long"
+    },
+    "ime": {
+      "type": "text",
+      "analyzer": "serbian_ngram_analyzer",
+      "search_analyzer": "serbian_search_analyzer",
+      "fields": {
+        "phrase": {
+          "type": "text",
+          "analyzer": "serbian_phrase_analyzer"
+        }
+      }
+    },
+    "opis": {
+      "type": "text",
+      "analyzer": "serbian_ngram_analyzer",
+      "search_analyzer": "serbian_search_analyzer",
+      "fields": {
+        "phrase": {
+          "type": "text",
+          "analyzer": "serbian_phrase_analyzer"
+        }
+      }
+    },
+    "pdfContent": {
+      "type": "text",
+      "analyzer": "serbian_ngram_analyzer",
+      "search_analyzer": "serbian_search_analyzer",
+      "fields": {
+        "phrase": {
+          "type": "text",
+          "analyzer": "serbian_phrase_analyzer"
+        }
+      }
+    },
+    "datumKreacije": {
+      "type": "date",
+      "format": "date_optional_time||epoch_millis"
+    },
+    "adresa": {
+      "type": "text"
+    },
+    "grad": {
+      "type": "text"
+    },
+    "rating": {
+      "type": "double"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "imagePath": {
+      "type": "text"
+    },
+    "pdfPath": {
+      "type": "text"
+    }
+  }
+}

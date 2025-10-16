@@ -39,26 +39,32 @@ public class ElasticsearchQueryService {
      */
     public List<CentarDocument> searchWithPhraseSupport(String queryString) {
         if (queryString == null || queryString.trim().isEmpty()) {
+            log.info("Empty query string, returning empty results");
             return new ArrayList<>();
         }
 
-        log.debug("Executing search with phrase support: {}", queryString);
+        log.info("Executing search with phrase support: {}", queryString);
 
         // Parse the query to extract exact phrases and regular terms
         SearchQueryParser.ParsedQuery parsedQuery = SearchQueryParser.parse(queryString);
+        log.info("Parsed query - Exact phrases: {}, Regular terms: {}", 
+                parsedQuery.getExactPhrases(), parsedQuery.getRegularTerms());
 
         if (parsedQuery.isEmpty()) {
+            log.info("Parsed query is empty, returning empty results");
             return new ArrayList<>();
         }
 
         // Build the Elasticsearch query
         Query elasticsearchQuery = buildMultiFieldQuery(parsedQuery);
+        log.info("Built Elasticsearch query");
 
         // Execute the query
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(elasticsearchQuery)
                 .build();
 
+        log.info("Executing Elasticsearch search query");
         SearchHits<CentarDocument> searchHits = elasticsearchOperations.search(
                 searchQuery,
                 CentarDocument.class
@@ -68,7 +74,7 @@ public class ElasticsearchQueryService {
                 .map(SearchHit::getContent)
                 .collect(Collectors.toList());
 
-        log.debug("Search returned {} results", results.size());
+        log.info("Search returned {} results for query: {}", results.size(), queryString);
         return results;
     }
 
@@ -96,28 +102,30 @@ public class ElasticsearchQueryService {
     }
 
     /**
-     * Builds match_phrase queries for exact phrase matching across all searchable fields
+     * Builds match_phrase queries for exact phrase matching across all searchable fields.
+     * Uses the .phrase subfields which have standard tokenization (serbian_phrase_analyzer)
+     * instead of ngrams, making them suitable for true phrase matching.
      */
     private List<Query> buildPhraseQueries(String phrase) {
         List<Query> queries = new ArrayList<>();
 
-        // Search in ime field
+        // Search in ime.phrase field - uses standard tokenization for exact phrase matching
         queries.add(MatchPhraseQuery.of(m -> m
-                .field("ime")
+                .field("ime.phrase")
                 .query(phrase)
                 .boost(2.0f)  // Boost name matches
         )._toQuery());
 
-        // Search in opis field
+        // Search in opis.phrase field - uses standard tokenization for exact phrase matching
         queries.add(MatchPhraseQuery.of(m -> m
-                .field("opis")
+                .field("opis.phrase")
                 .query(phrase)
                 .boost(1.5f)  // Boost description matches
         )._toQuery());
 
-        // Search in pdfContent field
+        // Search in pdfContent.phrase field - uses standard tokenization for exact phrase matching
         queries.add(MatchPhraseQuery.of(m -> m
-                .field("pdfContent")
+                .field("pdfContent.phrase")
                 .query(phrase)
         )._toQuery());
 
