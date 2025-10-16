@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -13,7 +14,14 @@ export class NavbarComponent implements OnInit {
   isAdmin: boolean = false;
   isLoggedIn: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    // Listen for navigation events to update navbar state
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.checkUserStatus();
+    });
+  }
 
   ngOnInit(): void {
     this.checkUserStatus();

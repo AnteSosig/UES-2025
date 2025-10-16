@@ -27,6 +27,10 @@ export class UserProfileComponent implements OnInit {
     this.router.navigate(['/edit-profile']);
   }
 
+  goBack() {
+    this.router.navigate(['/home']);
+  }
+
   fetchUserInfo() {
     const token = localStorage.getItem('token');  // Assuming token is stored in localStorage
 
