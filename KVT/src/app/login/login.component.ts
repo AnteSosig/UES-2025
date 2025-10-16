@@ -33,7 +33,6 @@ export class LoginComponent {
           next: (response: any) => {
             localStorage.setItem('token', response.token);
             localStorage.setItem('uloga', response.uloga);
-            alert('Login successful!');
             this.router.navigate(['/home']);
           },
           error: (err) => {
