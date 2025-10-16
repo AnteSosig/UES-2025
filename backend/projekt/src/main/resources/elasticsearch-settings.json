@@ -39,8 +39,8 @@
       }
     },
     "tokenizer": {
-      "edge_ngram_tokenizer": {
-        "type": "edge_ngram",
+      "ngram_tokenizer": {
+        "type": "ngram",
         "min_gram": 1,
         "max_gram": 20,
         "token_chars": ["letter", "digit"]
@@ -69,7 +69,7 @@
         "char_filter": [
           "cyrillic_to_latin"
         ],
-        "tokenizer": "edge_ngram_tokenizer",
+        "tokenizer": "ngram_tokenizer",
         "filter": [
           "lowercase"
         ]
