@@ -1,6 +1,8 @@
 package com.example.sss.config;
 
+import com.example.sss.servisi.implementacije.CentarServisImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -12,12 +14,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
- * Applies custom field mappings to Elasticsearch index after it's created.
+ * Applies custom multi-field mappings to Elasticsearch index after startup.
  * This adds .phrase subfields to ime, opis, and pdfContent for proper phrase matching.
+ * Then triggers a re-index to populate the new subfields.
  */
 @Component
 @Slf4j
 public class ElasticsearchIndexConfiguration {
+    
+    @Autowired
+    private CentarServisImpl centarServis;
 
     private static final String MAPPINGS_JSON = """
             {
@@ -60,11 +66,11 @@ public class ElasticsearchIndexConfiguration {
             """;
 
     @EventListener(ApplicationReadyEvent.class)
-    @Order(100)  // Run after StartupIndexer
-    public void applyMappings() {
+    @Order(200)  // Run AFTER StartupIndexer (which is Order 100)
+    public void applyMultiFieldMappings() {
         try {
-            // Wait for index to be created and populated
-            Thread.sleep(10000);
+            // Wait for initial indexing to complete (StartupIndexer)
+            Thread.sleep(5000);
             
             log.info("========================================");
             log.info("Applying multi-field mappings to 'centri' index...");
@@ -72,7 +78,7 @@ public class ElasticsearchIndexConfiguration {
             
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:9200/centri/_mapping"))
+                    .uri(URI.create("http://elasticsearch:9200/centri/_mapping"))
                     .header("Content-Type", "application/json")
                     .PUT(HttpRequest.BodyPublishers.ofString(MAPPINGS_JSON))
                     .build();
@@ -81,14 +87,29 @@ public class ElasticsearchIndexConfiguration {
             
             if (response.statusCode() == 200) {
                 log.info("✅ Multi-field mappings applied successfully!");
-                log.info("✅ Fields ime.phrase, opis.phrase, pdfContent.phrase are now available for exact phrase matching");
+                log.info("✅ Fields ime.phrase, opis.phrase, pdfContent.phrase are now available");
+                
+                // CRITICAL: Trigger re-index to populate the new .phrase subfields
+                log.info("========================================");
+                log.info("🔄 Re-indexing all centers to populate .phrase subfields...");
+                log.info("========================================");
+                
+                Thread.sleep(2000); // Give Elasticsearch a moment to apply the mapping
+                
+                int reindexCount = centarServis.reindexAllCenters();
+                
+                log.info("========================================");
+                log.info("✅ Re-indexing complete! {} centers now have phrase search support", reindexCount);
+                log.info("✅ Quoted searches are now fully operational!");
                 log.info("========================================");
             } else {
                 log.error("❌ Failed to apply mappings. Status: " + response.statusCode());
                 log.error("Response: " + response.body());
+                log.error("⚠️  Phrase searches will not work until mappings are manually applied");
             }
         } catch (Exception e) {
-            log.error("❌ Error applying custom mappings: " + e.getMessage(), e);
+            log.error("❌ Failed to apply multi-field mappings: " + e.getMessage(), e);
+            log.error("⚠️  Phrase searches will not work until mappings are manually applied");
         }
     }
 }

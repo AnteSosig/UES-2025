@@ -75,6 +75,15 @@ public class ElasticsearchQueryService {
                 .collect(Collectors.toList());
 
         log.info("Search returned {} results for query: {}", results.size(), queryString);
+        
+        // Debug: Log each result with its score
+        searchHits.getSearchHits().forEach(hit -> {
+            log.info("  Result: ID={}, Score={}, Name={}", 
+                    hit.getContent().getId(), 
+                    hit.getScore(), 
+                    hit.getContent().getIme());
+        });
+        
         return results;
     }
 
@@ -106,49 +115,67 @@ public class ElasticsearchQueryService {
      * Uses the .phrase subfields which have standard tokenization (serbian_phrase_analyzer)
      * instead of ngrams, making them suitable for true phrase matching.
      * 
-     * Also adds individual word matches with lower boost for flexibility.
+     * For single-word phrases: uses both match_phrase (exact) and match (partial) for flexibility.
+     * For multi-word phrases: uses ONLY match_phrase for strict exact matching.
      */
     private List<Query> buildPhraseQueries(String phrase) {
         List<Query> queries = new ArrayList<>();
+        
+        log.info("Building phrase queries for: '{}'", phrase);
+        
+        // Check if this is a single word or multi-word phrase
+        boolean isSingleWord = !phrase.contains(" ");
+        log.info("  Phrase type: {}", isSingleWord ? "single word" : "multi-word");
 
-        // HIGH PRIORITY: Exact phrase matches (boosted heavily)
+        // ALWAYS add exact phrase matches (high boost)
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("ime.phrase")
                 .query(phrase)
                 .boost(5.0f)  // Very high boost for exact phrase in name
         )._toQuery());
+        log.info("  Added match_phrase: ime.phrase='{}' (boost=5.0)", phrase);
 
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("opis.phrase")
                 .query(phrase)
                 .boost(3.0f)  // High boost for exact phrase in description
         )._toQuery());
+        log.info("  Added match_phrase: opis.phrase='{}' (boost=3.0)", phrase);
 
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("pdfContent.phrase")
                 .query(phrase)
                 .boost(2.0f)  // Medium boost for exact phrase in PDF
         )._toQuery());
+        log.info("  Added match_phrase: pdfContent.phrase='{}' (boost=2.0)", phrase);
 
-        // LOWER PRIORITY: Individual word matches (for single words or partial phrase matches)
-        // This allows "puno" alone to match documents containing "puno anime"
-        queries.add(MatchQuery.of(m -> m
-                .field("ime.phrase")
-                .query(phrase)
-                .boost(1.5f)  // Lower boost for word match in name
-        )._toQuery());
+        // ONLY for single-word phrases: add match queries for partial matching
+        // This allows "puno" to match documents containing "puno anime"
+        // But prevents "puno anime" from matching documents with just "puno" or just "anime"
+        if (isSingleWord) {
+            queries.add(MatchQuery.of(m -> m
+                    .field("ime.phrase")
+                    .query(phrase)
+                    .boost(1.5f)  // Lower boost for word match in name
+            )._toQuery());
+            log.info("  Added match: ime.phrase='{}' (boost=1.5) - single word flexibility", phrase);
 
-        queries.add(MatchQuery.of(m -> m
-                .field("opis.phrase")
-                .query(phrase)
-                .boost(1.0f)  // Lower boost for word match in description
-        )._toQuery());
+            queries.add(MatchQuery.of(m -> m
+                    .field("opis.phrase")
+                    .query(phrase)
+                    .boost(1.0f)  // Lower boost for word match in description
+            )._toQuery());
+            log.info("  Added match: opis.phrase='{}' (boost=1.0) - single word flexibility", phrase);
 
-        queries.add(MatchQuery.of(m -> m
-                .field("pdfContent.phrase")
-                .query(phrase)
-                .boost(0.5f)  // Lowest boost for word match in PDF
-        )._toQuery());
+            queries.add(MatchQuery.of(m -> m
+                    .field("pdfContent.phrase")
+                    .query(phrase)
+                    .boost(0.5f)  // Lowest boost for word match in PDF
+            )._toQuery());
+            log.info("  Added match: pdfContent.phrase='{}' (boost=0.5) - single word flexibility", phrase);
+        } else {
+            log.info("  Skipped match queries - multi-word phrase requires exact matching only");
+        }
 
         return queries;
     }

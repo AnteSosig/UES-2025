@@ -164,6 +164,36 @@ public class CentarServisImpl implements CentarServis {
             throw new RuntimeException("Error indexing all centers", e);
         }
     }
+    
+    /**
+     * Re-indexes all centers and returns the count.
+     * Used after applying new Elasticsearch mappings to populate new fields.
+     */
+    public int reindexAllCenters() {
+        try {
+            List<Centar> allCentri = centarRepozitorijum.findAll();
+            for (Centar centar : allCentri) {
+                String pdfContent = null;
+                
+                if (centar.getPdfPath() != null && !centar.getPdfPath().isEmpty()) {
+                    try {
+                        InputStream pdfStream = minioService.downloadFile(centar.getPdfPath());
+                        pdfContent = pdfParserService.extractTextFromPdf(pdfStream);
+                    } catch (Exception e) {
+                        log.warn("Failed to re-extract PDF for center {}: {}", 
+                                centar.getId(), e.getMessage());
+                    }
+                }
+                
+                indexCentar(centar, pdfContent);
+            }
+            log.info("All {} centers re-indexed successfully", allCentri.size());
+            return allCentri.size();
+        } catch (Exception e) {
+            log.error("Error re-indexing all centers", e);
+            throw new RuntimeException("Error re-indexing all centers", e);
+        }
+    }
 
     @Override
     public List<CentarDocument> searchByNaziv(String naziv) {
