@@ -1,149 +1,172 @@
-<div *ngIf="centarDetails">
-  <h2>{{ centarDetails.ime }}</h2>
-  <p><strong>Opis:</strong> {{ centarDetails.ophis }}</p>
-  <p><strong>City:</strong> {{ centarDetails.grad }}</p>
-  <p><strong>Address:</strong> {{ centarDetails.adresa }}</p>
-  <p><strong>Rating:</strong> {{ centarDetails.rating }}</p>
-  <p><strong>Generated:</strong> {{ centarDetails.datumKreacije | date:'yyyy-MM-dd' }}</p> 
+<div class="centar-container">
+  <!-- Back Button -->
+  <div class="back-button-container">
+    <button (click)="goBack()" class="btn btn-secondary back-btn">
+      ← Nazad na početnu
+    </button>
+  </div>
 
-  <!-- IMAGE AND PDF SECTION -->
-  <div style="margin-top: 20px; margin-bottom: 20px;">
-    <h3>Mediji</h3>
-    
-    <!-- DEBUG: Show raw center data -->
-    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 15px; font-size: 12px;">
-      <strong>DEBUG - Center Data:</strong><br>
-      imagePath: {{ centarDetails.imagePath || 'NULL/UNDEFINED' }}<br>
-      pdfPath: {{ centarDetails.pdfPath || 'NULL/UNDEFINED' }}<br>
-      hasPdf: {{ centarDetails.hasPdf }}<br>
-      Center ID: {{ centarId }}<br>
-      <pre style="font-size: 10px; max-height: 200px; overflow: auto;">{{ centarDetails | json }}</pre>
-    </div>
-    
-    <!-- Display Image if available -->
-    <div *ngIf="centarDetails.imagePath" style="margin-bottom: 15px;">
-      <h5>Slika centra:</h5>
-      <p style="font-size: 12px; color: #666;">
-        Debug - imagePath: {{ centarDetails.imagePath }}<br>
-        Debug - imageUrl: {{ getImageUrl(centarDetails.imagePath) }}
-      </p>
-      <img [src]="getImageUrl(centarDetails.imagePath)" 
-           alt="Centar Image" 
-           style="max-width: 500px; border: 1px solid #ccc; border-radius: 8px;">
-    </div>
-
-    <!-- Display PDF download if available -->
-    <div *ngIf="centarDetails.pdfPath || centarDetails.hasPdf">
-      <h5>PDF Dokument:</h5>
-      <button (click)="downloadPdf()" class="btn btn-primary">
-        <i class="bi bi-download"></i> Download PDF
-      </button>
-      <div *ngIf="pdfDownloadError" class="alert alert-danger" style="margin-top: 10px;">
-        {{ pdfDownloadError }}
+  <div *ngIf="centarDetails" class="centar-content">
+    <div class="centar-header">
+      <h2>{{ centarDetails.ime }}</h2>
+      <div class="rating-badge" *ngIf="centarDetails.rating">
+        ⭐ {{ centarDetails.rating }}
       </div>
     </div>
 
-    <div *ngIf="!centarDetails.imagePath && !centarDetails.pdfPath && !centarDetails.hasPdf">
-      <p style="color: #999;">Nema postavljenih medija za ovaj centar.</p>
+    <div class="info-card">
+      <p><strong>Opis:</strong> {{ centarDetails.ophis }}</p>
+      <p><strong>Grad:</strong> {{ centarDetails.grad }}</p>
+      <p><strong>Adresa:</strong> {{ centarDetails.adresa }}</p>
+      <p><strong>Datum kreiranja:</strong> {{ centarDetails.datumKreacije | date:'dd.MM.yyyy' }}</p>
+    </div>
+
+    <!-- IMAGE AND PDF SECTION -->
+    <div class="media-section">
+      <h3>Mediji</h3>
+      
+      <!-- Display Image if available -->
+      <div *ngIf="centarDetails.imagePath" class="image-container">
+        <h5>Slika centra:</h5>
+        <img [src]="getImageUrl(centarDetails.imagePath)" 
+             alt="Centar Image" 
+             style="max-width: 300px; max-height: 300px; width: auto; height: auto; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); object-fit: contain;">
+      </div>
+
+      <!-- Display PDF download if available -->
+      <div *ngIf="centarDetails.pdfPath || centarDetails.hasPdf" class="pdf-section">
+        <h5>PDF Dokument:</h5>
+        <button (click)="downloadPdf()" class="btn btn-danger pdf-btn">
+          📥 Preuzmi PDF
+        </button>
+        <div *ngIf="pdfDownloadError" class="alert alert-danger">
+          {{ pdfDownloadError }}
+        </div>
+      </div>
+
+      <div *ngIf="!centarDetails.imagePath && !centarDetails.pdfPath && !centarDetails.hasPdf" class="no-media">
+        <p>Nema postavljenih medija za ovaj centar.</p>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>Discipline:</h3>
+      <ul class="discipline-list">
+        <li *ngFor="let disciplina of centarDetails.discipline">
+          <span class="badge badge-primary">{{ disciplina }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h3>Radno vreme:</h3>
+      <div class="working-hours">
+        <div *ngFor="let radnoVreme of centarDetails.radnoVremeDTOList" class="day-schedule">
+          <strong>{{ radnoVreme.danNedelje }}:</strong>
+          <span>{{ radnoVreme.vremeOtvaranja }} - {{ radnoVreme.vremeZatvaranja }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Button (only visible for ADMIN) -->
+    <button *ngIf="uloga === 'ADMIN'" (click)="onEditClick()" class="btn btn-warning admin-btn">
+      ✏️ Izmeni centar
+    </button>
+
+    <!-- Reservation Form (only visible for KORISNIK) -->
+    <div *ngIf="uloga === 'KORISNIK'" class="user-section">
+      <div class="info-card">
+        <h3>Rezervacija</h3>
+        <form [formGroup]="reservationForm" (ngSubmit)="onSubmitReservation()">
+          <div class="form-group">
+            <label for="datum">Datum:</label>
+            <input id="datum" type="date" formControlName="datum" class="form-control" required>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="pocetak">Početak:</label>
+                <input id="pocetak" type="time" formControlName="pocetak" class="form-control" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="kraj">Kraj:</label>
+                <input id="kraj" type="time" formControlName="kraj" class="form-control" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="reservationForm.invalid" class="btn btn-success">
+            📅 Rezerviši
+          </button>
+        </form>
+
+        <!-- Success Message -->
+        <div *ngIf="reservationSuccessMessage" class="alert alert-success">
+          {{ reservationSuccessMessage }}
+        </div>
+      </div>
+
+      <!-- Review Section -->
+      <div class="info-card">
+        <h3>Ostavi recenziju</h3>
+        <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+          <div class="review-grid">
+            <div class="review-item">
+              <label>Opremljenost:</label>
+              <div class="rating-options">
+                <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="rating-option">
+                  <input type="radio" [id]="'opremljenost-' + num" formControlName="opremljenost" [value]="num">
+                  <label [for]="'opremljenost-' + num">{{ num }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-item">
+              <label>Osoblje:</label>
+              <div class="rating-options">
+                <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="rating-option">
+                  <input type="radio" [id]="'osoblje-' + num" formControlName="osoblje" [value]="num">
+                  <label [for]="'osoblje-' + num">{{ num }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-item">
+              <label>Higijena:</label>
+              <div class="rating-options">
+                <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="rating-option">
+                  <input type="radio" [id]="'higijena-' + num" formControlName="higijena" [value]="num">
+                  <label [for]="'higijena-' + num">{{ num }}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-item">
+              <label>Prostorija:</label>
+              <div class="rating-options">
+                <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="rating-option">
+                  <input type="radio" [id]="'prostorija-' + num" formControlName="prostorija" [value]="num">
+                  <label [for]="'prostorija-' + num">{{ num }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="reviewForm.invalid" class="btn btn-primary">
+            ⭐ Pošalji recenziju
+          </button>
+        </form>
+
+        <!-- Success Message -->
+        <div *ngIf="reviewSuccessMessage" class="alert alert-success">
+          {{ reviewSuccessMessage }}
+        </div>
+      </div>
     </div>
   </div>
-
-  <h3>Discipline:</h3>
-  <ul>
-    <li *ngFor="let disciplina of centarDetails.discipline">
-      <strong>{{ disciplina }}</strong>
-    </li>
-  </ul>
-
-  <h3>Working Hours:</h3>
-  <ul>
-    <li *ngFor="let radnoVreme of centarDetails.radnoVremeDTOList">
-      <strong>{{ radnoVreme.danNedelje }}</strong>: {{ radnoVreme.vremeOtvaranja }} - {{ radnoVreme.vremeZatvaranja }}
-    </li>
-  </ul>
-
-  <!-- Edit Button (only visible for ADMIN) -->
-  <button *ngIf="uloga === 'ADMIN'" (click)="onEditClick()">Edit</button>
-
-  <!-- Reservation Form (only visible for KORISNIK) -->
-  <div *ngIf="uloga === 'KORISNIK'">
-    <h3>Make a Reservation</h3>
-    <form [formGroup]="reservationForm" (ngSubmit)="onSubmitReservation()">
-      <label for="datum">Date:</label>
-      <input id="datum" type="date" formControlName="datum" required>
-      <br>
-
-      <label for="pocetak">Start Time:</label>
-      <input id="pocetak" type="time" formControlName="pocetak" required>
-      <br>
-
-      <label for="kraj">End Time:</label>
-      <input id="kraj" type="time" formControlName="kraj" required>
-      <br>
-
-      <button type="submit" [disabled]="reservationForm.invalid">Reserve</button>
-    </form>
-
-    <!-- Success Message -->
-    <div *ngIf="reservationSuccessMessage" class="alert alert-success">
-      {{ reservationSuccessMessage }}
-    </div>
-
-    <!-- Review Section -->
-    <h3>Submit a Review</h3>
-    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-      <table>
-        <tr>
-          <th>Opremljenost</th>
-          <td>
-            <div class="flex-col">
-              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-                <input type="radio" formControlName="opremljenost" [value]="num"> {{ num }}
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>Osoblje</th>
-          <td>
-            <div class="flex-col">
-              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-                <input type="radio" formControlName="osoblje" [value]="num"> {{ num }}
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>Higijena</th>
-          <td>
-            <div class="flex-col">
-              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-                <input type="radio" formControlName="higijena" [value]="num"> {{ num }}
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>Prostorija</th>
-          <td>
-            <div class="flex-col">
-              <div *ngFor="let num of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-                <input type="radio" formControlName="prostorija" [value]="num"> {{ num }}
-              </div>
-            </div>
-          </td>
-        </tr>
-      </table>
-
-      <button type="submit" [disabled]="reviewForm.invalid">Submit Review</button>
-    </form>
-
-    <!-- Success Message -->
-    <div *ngIf="reviewSuccessMessage" class="alert alert-success">
-      {{ reviewSuccessMessage }}
-    </div>
-  </div>
-</div>
 
 <!-- Loading message if data is not yet available -->
 <div *ngIf="!centarDetails && !errorMessage">

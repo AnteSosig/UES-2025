@@ -193,4 +193,9 @@ export class CentarComponent implements OnInit {
     // Just return the API URL - no auth needed now
     return `http://localhost:8080/api/centri/${this.centarId}/image`;
   }
+
+  // Navigate back to home page
+  goBack(): void {
+    this.router.navigate(['/home']);
+  }
 }

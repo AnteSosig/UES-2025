@@ -6,20 +6,18 @@
       <form [formGroup]="searchForm">
         <div class="form-group">
           <label for="query"><strong>Pretraži objekte po nazivu, opisu ili sadržaju PDF-a:</strong></label>
-          <div class="input-group">
+          <div class="search-wrapper">
             <input 
               formControlName="query" 
               id="query" 
-              class="form-control form-control-lg" 
+              class="form-control form-control-lg search-input" 
               type="text" 
               placeholder="Unesite tekst za pretragu..."
               (keyup.enter)="onSearchUnified()">
-            <div class="input-group-append">
-              <button (click)="onSearchUnified()" type="button" class="btn btn-primary btn-lg">
-                <span *ngIf="!isSearching">🔍 Pretraži</span>
-                <span *ngIf="isSearching">Pretražujem...</span>
-              </button>
-            </div>
+            <button (click)="onSearchUnified()" type="button" class="btn btn-primary btn-lg search-button">
+              <span *ngIf="!isSearching">🔍 Pretraži</span>
+              <span *ngIf="isSearching">Pretražujem...</span>
+            </button>
           </div>
         </div>
       </form>
@@ -82,7 +80,7 @@
                 <button (click)="removeWorkingHour('ponedeljak', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('ponedeljak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('ponedeljak')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
 
           <!-- Utorak -->
@@ -94,7 +92,7 @@
                 <button (click)="removeWorkingHour('utorak', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('utorak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('utorak')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
 
           <!-- Sreda -->
@@ -106,7 +104,7 @@
                 <button (click)="removeWorkingHour('sreda', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('sreda')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('sreda')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
         </div>
 
@@ -121,7 +119,7 @@
                 <button (click)="removeWorkingHour('cetvrtak', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('cetvrtak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('cetvrtak')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
 
           <!-- Petak -->
@@ -133,7 +131,7 @@
                 <button (click)="removeWorkingHour('petak', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('petak')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('petak')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
 
           <!-- Subota -->
@@ -145,7 +143,7 @@
                 <button (click)="removeWorkingHour('subota', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('subota')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('subota')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
         </div>
 
@@ -160,7 +158,7 @@
                 <button (click)="removeWorkingHour('nedelja', i)" type="button" class="btn btn-danger ml-2">×</button>
               </div>
             </div>
-            <button (click)="addWorkingHour('nedelja')" type="button" class="btn btn-sm btn-outline-primary mt-2">+ Add</button>
+            <button (click)="addWorkingHour('nedelja')" type="button" class="btn btn-sm btn-success mt-2">+ Add</button>
           </div>
         </div>
       </div>

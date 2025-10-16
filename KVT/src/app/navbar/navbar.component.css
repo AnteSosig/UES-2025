@@ -1,0 +1,38 @@
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  padding: 0.5rem 2rem;
+}
+
+.navbar-brand {
+  letter-spacing: 1px;
+}
+
+.nav-link {
+  font-weight: 500;
+  margin: 0 10px;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #ffeb3b !important;
+}
+
+.logout-btn {
+  margin-left: 15px;
+  margin-right: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,.2);
+}
+
+.navbar-nav {
+  align-items: center;
+}
+
+.ms-auto {
+  margin-right: 1rem !important;
+}

@@ -1,28 +1,28 @@
 <div>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="/home" style="margin-left: 10%;">S(h)itpass</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="/home" style="margin-left: 10%; font-weight: bold; font-size: 1.5rem;">UESpass</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item">
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item" *ngIf="isLoggedIn">
         <a class="nav-link" href="/profile">Profil</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="!isLoggedIn">
         <a class="nav-link" href="/login">Login</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isAdmin">
         <a class="nav-link" href="/svizahtevi">Zahtevi</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isAdmin">
         <a class="nav-link" href="/novicentar">Novi Centar</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="!isLoggedIn">
         <a class="nav-link" href="/register">Register</a>
       </li>
-      <li class="nav-item">
-        <button class="btn btn-danger" (click)="logout()">Logout</button>
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <button class="btn btn-danger logout-btn" (click)="logout()">Logout</button>
       </li>
     </ul>
   </div>

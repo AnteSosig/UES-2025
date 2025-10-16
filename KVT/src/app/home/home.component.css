@@ -1,0 +1,76 @@
+/* Search Bar Styling */
+.unified-search {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.search-wrapper {
+  display: flex;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #667eea;
+}
+
+.search-input {
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 15px 20px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.search-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.search-button {
+  border-radius: 0 !important;
+  padding: 15px 30px !important;
+  border: none;
+  white-space: nowrap;
+}
+
+/* Advanced Search Section */
+.advanced-search {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+/* Working Hours Add Buttons - Make them visible with green color */
+.btn-success.btn-sm {
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(17, 153, 142, 0.3);
+  white-space: nowrap;
+}
+
+/* Container Background */
+.container {
+  background: transparent;
+  padding: 2rem;
+}
+
+/* Page Title */
+.container > h2 {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+/* Card styling for results */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}

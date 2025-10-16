@@ -1,132 +1,250 @@
-/* Container for the whole section */
-div[ngIf="centarDetails"] {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
+﻿/* Container */
+.centar-container {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-button-container {
+  margin-bottom: 1.5rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.back-btn {
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateX(-5px);
+}
+
+.centar-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.centar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.centar-header h2 {
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.rating-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+}
+
+.info-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+}
+
+.info-card h3 {
+  color: #667eea;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.info-card p {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.info-card strong {
+  color: #764ba2;
+}
+
+.media-section {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.media-section h3 {
+  color: #667eea;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.image-container {
+  margin-bottom: 2rem;
+}
+
+.pdf-section {
+  margin-top: 1.5rem;
+}
+
+.pdf-btn {
+  font-weight: 600;
+  padding: 12px 25px;
+}
+
+.no-media {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.discipline-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 1rem;
+  box-shadow: 0 4px 10px rgba(17, 153, 142, 0.3);
+}
+
+.working-hours {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.day-schedule {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.day-schedule strong {
+  color: #667eea;
+  margin-right: 10px;
+}
+
+.admin-btn {
+  margin: 2rem 0;
+  font-weight: 600;
+  padding: 12px 25px;
+}
+
+.user-section {
+  margin-top: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.review-grid {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.review-item label:first-child {
+  display: block;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.rating-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rating-option {
+  display: flex;
+  align-items: center;
+}
+
+.rating-option input[type="radio"] {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.rating-option label {
+  margin-left: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.rating-option input[type="radio"]:checked + label {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.alert {
+  margin-top: 1rem;
+  border-radius: 10px;
+  padding: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .centar-container {
+    padding: 1rem;
   }
-  
-  /* Heading for the center name */
-  div[ngIf="centarDetails"] h2 {
-    color: #2c3e50;
-    font-size: 28px;
-    margin-bottom: 10px;
+  .centar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
-  
-  /* Subheadings for sections */
-  div[ngIf="centarDetails"] h3 {
-    color: #2980b9;
-    font-size: 22px;
-    margin-top: 20px;
+  .centar-header h2 {
+    font-size: 2rem;
   }
-  
-  /* Paragraph text */
-  div[ngIf="centarDetails"] p {
-    color: #34495e;
-    font-size: 16px;
-    line-height: 1.5;
-    margin: 5px 0;
+  .working-hours {
+    grid-template-columns: 1fr;
   }
-  
-  /* Strong tags for labels */
-  div[ngIf="centarDetails"] strong {
-    color: #e74c3c;
+  .rating-options {
+    justify-content: space-between;
   }
-  
-  /* List styles for disciplines and working hours */
-  div[ngIf="centarDetails"] ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  div[ngIf="centarDetails"] li {
-    color: #34495e;
-    margin: 5px 0;
-  }
-  
-  /* Button styles */
-  button {
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #2ecc71;
-  }
-  
-  /* Reservation form styling */
-  form {
-    margin-top: 20px;
-  }
-  
-  form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #2c3e50;
-  }
-  
-  form input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #bdc3c7;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  
-  form button[type="submit"] {
-    background-color: #3498db;
-  }
-  
-  form button[type="submit"]:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-  }
-  
-  /* Success message styling */
-  .alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    padding: 10px;
-    border-radius: 4px;
-    margin-top: 10px;
-  }
-  
-  /* Error message styling */
-  .alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    padding: 10px;
-    border-radius: 4px;
-    margin-top: 10px;
-  }
-  
-  /* Loading message styling */
-  div[ngIf="!centarDetails && !errorMessage"] {
-    font-size: 18px;
-    color: #7f8c8d;
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .flex-col {
-    display: flex;
-    flex-direction: row;
-    gap: 5px; /* Adds spacing between the radio buttons */
-  }
-  
-  .flex-col div {
-    margin: 5px 0;
-  }
+}
