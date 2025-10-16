@@ -139,8 +139,24 @@ public class CentarServisImpl implements CentarServis {
 
     @Override
     public void indexCentar(Centar centar) {
-        // When called without pdfContent, just index basic info (no PDF content)
-        indexCentar(centar, null);
+        // When called without pdfContent parameter, check if center has PDF and extract it
+        String pdfContent = null;
+        
+        if (centar.getPdfPath() != null && !centar.getPdfPath().isEmpty()) {
+            try {
+                log.debug("Re-extracting PDF content for center {} during re-index", centar.getId());
+                InputStream pdfStream = minioService.downloadFile(centar.getPdfPath());
+                pdfContent = pdfParserService.extractTextFromPdf(pdfStream);
+                log.debug("PDF content re-extracted for center {}, length: {} characters", 
+                        centar.getId(), pdfContent.length());
+            } catch (Exception e) {
+                log.warn("Failed to re-extract PDF content for center {} during re-index: {}", 
+                        centar.getId(), e.getMessage());
+                // Continue indexing without PDF content
+            }
+        }
+        
+        indexCentar(centar, pdfContent);
     }
 
     @Override
