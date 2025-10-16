@@ -379,6 +379,11 @@ public class CentarKontroler {
                 if (centar.getRating() != 11) {
                     centarDTO.setRating(centar.getRating());
                 }
+                
+                // Set review count
+                int reviewCount = ocenaRepozitorijum.oceneObjekta(centar.getId()).size();
+                centarDTO.setReviewCount(reviewCount);
+                
                 System.out.println(centarDTO.getIme());
 
                 List<RadnoVreme> radnaVremena = radnoVremeRepozitorijum.otvoren(centar.getId(), "ponedeljak");
@@ -753,6 +758,18 @@ public class CentarKontroler {
                     }
                     centarRepozitorijum.izmeniOcenu(sabraneOcene/srednjeVrednosti.size(), ocenaDTO.centar);
 
+                    // Re-index center in Elasticsearch to update reviewCount
+                    try {
+                        Centar updatedCentar = centarRepozitorijum.findById(ocenaDTO.centar);
+                        if (updatedCentar != null) {
+                            centarServis.indexCentar(updatedCentar);
+                            log.info("Center {} re-indexed after new review - reviewCount updated", ocenaDTO.centar);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to re-index center {} after new review: {}", ocenaDTO.centar, e.getMessage());
+                        // Don't fail the request if re-indexing fails
+                    }
+
                     return new ResponseEntity<>(null, HttpStatus.OK);
                 }
             }
@@ -988,6 +1005,56 @@ public class CentarKontroler {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error reindexing: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/debug-reviewcount")
+    public ResponseEntity<?> debugReviewCount(@RequestHeader("authorization") String token) {
+        
+        String email = null;
+        try {
+            email = tokenUtils.getClaimsFromToken(token).getSubject();
+        } catch (Exception ignored) {
+        }
+
+        if (email == null) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        Korisnik korisnik = korisnikRepozitorijum.findByEmail(email);
+        if (korisnik == null || !korisnik.isActive()) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            // Get all centers from Elasticsearch
+            List<CentarDocument> allDocs = centarServis.searchAll("*");
+            
+            List<Map<String, Object>> debugInfo = new ArrayList<>();
+            for (CentarDocument doc : allDocs) {
+                Map<String, Object> info = new HashMap<>();
+                info.put("id", doc.getId());
+                info.put("ime", doc.getIme());
+                info.put("reviewCount", doc.getReviewCount());
+                
+                // Also get actual count from database for comparison
+                List<Ocena> reviews = ocenaRepozitorijum.oceneObjekta(doc.getId());
+                info.put("actualReviewCount", reviews.size());
+                info.put("match", Objects.equals(doc.getReviewCount(), reviews.size()));
+                
+                debugInfo.add(info);
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("totalCenters", debugInfo.size());
+            response.put("centers", debugInfo);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            error.put("trace", e.getClass().getName());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 

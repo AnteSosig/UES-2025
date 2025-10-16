@@ -57,6 +57,9 @@
     },
     "pdfPath": {
       "type": "text"
+    },
+    "reviewCount": {
+      "type": "integer"
     }
   }
 }

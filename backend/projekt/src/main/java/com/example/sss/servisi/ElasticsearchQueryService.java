@@ -4,6 +4,8 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.json.JsonData;
 import com.example.sss.model.elasticsearch.CentarDocument;
 import com.example.sss.util.SearchQueryParser;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +47,10 @@ public class ElasticsearchQueryService {
 
         log.info("Executing search with phrase support: {}", queryString);
 
-        // Parse the query to extract exact phrases and regular terms
+        // Parse the query to extract exact phrases, regular terms, and range queries
         SearchQueryParser.ParsedQuery parsedQuery = SearchQueryParser.parse(queryString);
-        log.info("Parsed query - Exact phrases: {}, Regular terms: {}", 
-                parsedQuery.getExactPhrases(), parsedQuery.getRegularTerms());
+        log.info("Parsed query - Exact phrases: {}, Regular terms: {}, Range queries: {}", 
+                parsedQuery.getExactPhrases(), parsedQuery.getRegularTerms(), parsedQuery.getRangeQueries());
 
         if (parsedQuery.isEmpty()) {
             log.info("Parsed query is empty, returning empty results");
@@ -88,10 +90,17 @@ public class ElasticsearchQueryService {
     }
 
     /**
-     * Builds a multi-field query that searches across ime, opis, and pdfContent fields
+     * Builds a multi-field query that searches across ime, opis, and pdfContent fields,
+     * and supports range queries for numeric fields like reviewCount
      */
     private Query buildMultiFieldQuery(SearchQueryParser.ParsedQuery parsedQuery) {
         List<Query> shouldClauses = new ArrayList<>();
+        List<Query> mustClauses = new ArrayList<>();
+
+        log.debug("Building multi-field query:");
+        log.debug("  - Exact phrases: {}", parsedQuery.getExactPhrases().size());
+        log.debug("  - Regular terms: {}", parsedQuery.getRegularTerms().size());
+        log.debug("  - Range queries: {}", parsedQuery.getRangeQueries().size());
 
         // Add exact phrase matches
         for (String phrase : parsedQuery.getExactPhrases()) {
@@ -103,11 +112,36 @@ public class ElasticsearchQueryService {
             shouldClauses.addAll(buildMatchQueries(term));
         }
 
-        // Use a bool query with should clauses (at least one must match)
-        return BoolQuery.of(b -> b
-                .should(shouldClauses)
-                .minimumShouldMatch("1")
-        )._toQuery();
+        // Add range queries as filter clauses
+        for (SearchQueryParser.RangeQuery rangeQuery : parsedQuery.getRangeQueries()) {
+            log.debug("  - Adding range query: field={}, min={}, max={}", 
+                    rangeQuery.getFieldName(), rangeQuery.getMinValue(), rangeQuery.getMaxValue());
+            mustClauses.add(buildRangeQuery(rangeQuery));
+        }
+
+        // Build the final bool query
+        BoolQuery.Builder boolBuilder = new BoolQuery.Builder();
+        
+        // If we have text search clauses, add them as should with minimum match
+        if (!shouldClauses.isEmpty()) {
+            boolBuilder.should(shouldClauses).minimumShouldMatch("1");
+        }
+        
+        // Add range filters as must clauses (filters)
+        if (!mustClauses.isEmpty()) {
+            boolBuilder.filter(mustClauses);
+        }
+        
+        // If there are no text searches, match all documents (filters will apply)
+        if (shouldClauses.isEmpty()) {
+            // When only filters exist, we need a match_all query
+            return BoolQuery.of(b -> b
+                .must(Query.of(q -> q.matchAll(m -> m)))
+                .filter(mustClauses)
+            )._toQuery();
+        }
+
+        return boolBuilder.build()._toQuery();
     }
 
     /**
@@ -210,5 +244,33 @@ public class ElasticsearchQueryService {
         )._toQuery());
 
         return queries;
+    }
+
+    /**
+     * Builds a range query for numeric fields like reviewCount
+     * Supports queries like reviews:<10, reviews:>5, reviews:5-10
+     */
+    private Query buildRangeQuery(SearchQueryParser.RangeQuery rangeQuery) {
+        log.info("Building range query for field: {}, min: {}, max: {}", 
+                rangeQuery.getFieldName(), rangeQuery.getMinValue(), rangeQuery.getMaxValue());
+
+        // Map common field aliases to actual field names
+        String fieldName = rangeQuery.getFieldName();
+        if ("reviews".equalsIgnoreCase(fieldName) || "review".equalsIgnoreCase(fieldName)) {
+            fieldName = "reviewCount";
+        }
+
+        final String finalFieldName = fieldName;
+
+        return RangeQuery.of(r -> {
+            r.field(finalFieldName);
+            if (rangeQuery.hasMin()) {
+                r.gte(JsonData.of(rangeQuery.getMinValue()));
+            }
+            if (rangeQuery.hasMax()) {
+                r.lte(JsonData.of(rangeQuery.getMaxValue()));
+            }
+            return r;
+        })._toQuery();
     }
 }

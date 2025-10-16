@@ -57,4 +57,7 @@ public class CentarDocument {
     // Multi-field will be defined in elasticsearch-mappings.json
     @Field(type = FieldType.Text)
     private String pdfContent;
+
+    @Field(type = FieldType.Integer)
+    private Integer reviewCount;
 }

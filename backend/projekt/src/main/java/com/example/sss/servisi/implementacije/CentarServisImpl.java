@@ -37,6 +37,9 @@ public class CentarServisImpl implements CentarServis {
     @Autowired
     private PdfParserService pdfParserService;
 
+    @Autowired
+    private com.example.sss.repozitorijumi.OcenaRepozitorijum ocenaRepozitorijum;
+
     @Override
     public List<Centar> getAll() {
         log.debug("Fetching all centers");
@@ -120,8 +123,14 @@ public class CentarServisImpl implements CentarServis {
                 document.setPdfContent(pdfContent);
             }
 
+            // Count reviews for this center
+            int reviewCount = ocenaRepozitorijum.oceneObjekta(centar.getId()).size();
+            document.setReviewCount(reviewCount);
+            log.debug("Center {} has {} reviews", centar.getId(), reviewCount);
+
             elasticsearchRepository.save(document);
-            log.info("Center {} indexed successfully in Elasticsearch", centar.getId());
+            log.info("Center {} indexed successfully in Elasticsearch with {} reviews", 
+                    centar.getId(), reviewCount);
         } catch (Exception e) {
             log.error("Error indexing center {} in Elasticsearch", centar.getId(), e);
             throw new RuntimeException("Error indexing center", e);

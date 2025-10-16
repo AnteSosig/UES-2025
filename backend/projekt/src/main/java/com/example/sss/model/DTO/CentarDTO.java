@@ -21,6 +21,7 @@ public class CentarDTO {
     public String adresa;
     public String grad;
     public Double rating;
+    public Integer reviewCount;
     public List<RadnoVremeDTO> radnoVremeDTOList;
     public String imagePath;
     public String pdfPath;
