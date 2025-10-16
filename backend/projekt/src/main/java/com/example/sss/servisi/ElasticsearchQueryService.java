@@ -105,28 +105,49 @@ public class ElasticsearchQueryService {
      * Builds match_phrase queries for exact phrase matching across all searchable fields.
      * Uses the .phrase subfields which have standard tokenization (serbian_phrase_analyzer)
      * instead of ngrams, making them suitable for true phrase matching.
+     * 
+     * Also adds individual word matches with lower boost for flexibility.
      */
     private List<Query> buildPhraseQueries(String phrase) {
         List<Query> queries = new ArrayList<>();
 
-        // Search in ime.phrase field - uses standard tokenization for exact phrase matching
+        // HIGH PRIORITY: Exact phrase matches (boosted heavily)
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("ime.phrase")
                 .query(phrase)
-                .boost(2.0f)  // Boost name matches
+                .boost(5.0f)  // Very high boost for exact phrase in name
         )._toQuery());
 
-        // Search in opis.phrase field - uses standard tokenization for exact phrase matching
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("opis.phrase")
                 .query(phrase)
-                .boost(1.5f)  // Boost description matches
+                .boost(3.0f)  // High boost for exact phrase in description
         )._toQuery());
 
-        // Search in pdfContent.phrase field - uses standard tokenization for exact phrase matching
         queries.add(MatchPhraseQuery.of(m -> m
                 .field("pdfContent.phrase")
                 .query(phrase)
+                .boost(2.0f)  // Medium boost for exact phrase in PDF
+        )._toQuery());
+
+        // LOWER PRIORITY: Individual word matches (for single words or partial phrase matches)
+        // This allows "puno" alone to match documents containing "puno anime"
+        queries.add(MatchQuery.of(m -> m
+                .field("ime.phrase")
+                .query(phrase)
+                .boost(1.5f)  // Lower boost for word match in name
+        )._toQuery());
+
+        queries.add(MatchQuery.of(m -> m
+                .field("opis.phrase")
+                .query(phrase)
+                .boost(1.0f)  // Lower boost for word match in description
+        )._toQuery());
+
+        queries.add(MatchQuery.of(m -> m
+                .field("pdfContent.phrase")
+                .query(phrase)
+                .boost(0.5f)  // Lowest boost for word match in PDF
         )._toQuery());
 
         return queries;
