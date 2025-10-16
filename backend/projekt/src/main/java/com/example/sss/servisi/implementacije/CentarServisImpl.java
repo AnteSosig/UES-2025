@@ -5,6 +5,7 @@ import com.example.sss.model.elasticsearch.CentarDocument;
 import com.example.sss.repozitorijumi.CentarRepozitorijum;
 import com.example.sss.repozitorijumi.CentarElasticsearchRepository;
 import com.example.sss.servisi.CentarServis;
+import com.example.sss.servisi.ElasticsearchQueryService;
 import com.example.sss.servisi.MinioService;
 import com.example.sss.servisi.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,9 @@ public class CentarServisImpl implements CentarServis {
 
     @Autowired
     private CentarElasticsearchRepository elasticsearchRepository;
+
+    @Autowired
+    private ElasticsearchQueryService elasticsearchQueryService;
 
     @Autowired
     private MinioService minioService;
@@ -183,13 +187,19 @@ public class CentarServisImpl implements CentarServis {
     public List<CentarDocument> searchAll(String query) {
         log.debug("Searching centers by all fields: {}", query);
         try {
-            // Use custom query with Serbian analyzer
-            return elasticsearchRepository.searchByQuery(query);
+            // Use new ElasticsearchQueryService with phrase matching support
+            return elasticsearchQueryService.searchWithPhraseSupport(query);
         } catch (Exception e) {
-            log.error("Error searching with custom query, falling back to basic search", e);
-            // Fallback to basic search if custom query fails
-            return elasticsearchRepository.findByImeContainingOrOpisContainingOrPdfContentContaining(
-                    query, query, query);
+            log.error("Error searching with phrase support, falling back to custom query", e);
+            try {
+                // Fallback to custom query with Serbian analyzer
+                return elasticsearchRepository.searchByQuery(query);
+            } catch (Exception e2) {
+                log.error("Error with custom query, falling back to basic search", e2);
+                // Final fallback to basic search
+                return elasticsearchRepository.findByImeContainingOrOpisContainingOrPdfContentContaining(
+                        query, query, query);
+            }
         }
     }
 

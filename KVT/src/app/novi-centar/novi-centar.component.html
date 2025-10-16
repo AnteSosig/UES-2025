@@ -1,73 +1,131 @@
-<div class="container">
-    <h2>Create New Centar</h2>
-  
+<div class="novi-centar-container">
+  <div class="novi-centar-card">
+    <div class="novi-centar-header">
+      <img src="assets/sui.png" alt="UESpass Logo" class="novi-centar-logo">
+      <h2>Create New Center</h2>
+      <p class="novi-centar-subtitle">Add a new fitness center to the platform</p>
+    </div>
+
     <form [formGroup]="centarForm" (ngSubmit)="onSubmit()">
       <!-- Display success and error messages -->
       <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
       <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-  
-      <!-- Name field -->
+
+      <!-- Basic Information Section -->
+      <div class="section-title">Basic Information</div>
+
       <div class="form-group">
-        <label for="ime">Name:</label>
-        <input type="text" id="ime" formControlName="ime" class="form-control" />
-        <div *ngIf="submitted && ime?.invalid" class="text-danger">
-          Name is required
+        <label for="ime">Center Name</label>
+        <input 
+          type="text" 
+          id="ime" 
+          formControlName="ime" 
+          class="form-control"
+          placeholder="Enter center name" />
+        <div *ngIf="submitted && ime?.invalid" class="error-message">
+          <small>Center name is required</small>
         </div>
       </div>
-  
-      <!-- Ophis field -->
+
       <div class="form-group">
-        <label for="ophis">Ophis:</label>
-        <input type="text" id="ophis" formControlName="ophis" class="form-control" />
-        <div *ngIf="submitted && ophis?.invalid" class="text-danger">
-          Ophis is required
+        <label for="ophis">Description</label>
+        <textarea 
+          id="ophis" 
+          formControlName="ophis" 
+          class="form-control textarea-control"
+          rows="4"
+          placeholder="Enter center description"></textarea>
+        <div *ngIf="submitted && ophis?.invalid" class="error-message">
+          <small>Description is required</small>
         </div>
       </div>
-  
-      <!-- Address field -->
-      <div class="form-group">
-        <label for="adresa">Address:</label>
-        <input type="text" id="adresa" formControlName="adresa" class="form-control" />
-        <div *ngIf="submitted && adresa?.invalid" class="text-danger">
-          Address is required
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="adresa">Address</label>
+          <input 
+            type="text" 
+            id="adresa" 
+            formControlName="adresa" 
+            class="form-control"
+            placeholder="Street address" />
+          <div *ngIf="submitted && adresa?.invalid" class="error-message">
+            <small>Address is required</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="grad">City</label>
+          <input 
+            type="text" 
+            id="grad" 
+            formControlName="grad" 
+            class="form-control"
+            placeholder="City name" />
+          <div *ngIf="submitted && grad?.invalid" class="error-message">
+            <small>City is required</small>
+          </div>
         </div>
       </div>
-  
-      <!-- City field -->
+
       <div class="form-group">
-        <label for="grad">City:</label>
-        <input type="text" id="grad" formControlName="grad" class="form-control" />
-        <div *ngIf="submitted && grad?.invalid" class="text-danger">
-          City is required
+        <label for="discipline">Disciplines</label>
+        <input 
+          type="text" 
+          id="discipline" 
+          formControlName="discipline" 
+          class="form-control"
+          placeholder="e.g., Yoga, Pilates, Cardio" />
+        <small class="helper-text">Separate multiple disciplines with commas</small>
+        <div *ngIf="submitted && discipline?.invalid" class="error-message">
+          <small>At least one discipline is required</small>
         </div>
       </div>
-  
-      <!-- Discipline field -->
-      <div class="form-group">
-        <label for="discipline">Disciplines (comma-separated):</label>
-        <input type="text" id="discipline" formControlName="discipline" class="form-control" />
-        <div *ngIf="submitted && discipline?.invalid" class="text-danger">
-          At least one discipline is required
-        </div>
-      </div>
-  
-      <!-- FILE UPLOAD FIELDS -->
-      <h4 style="margin-top: 30px;">Opcionalno: Upload Slika i PDF</h4>
+
+      <!-- File Upload Section -->
+      <div class="section-title">Media Files (Optional)</div>
       
       <div class="form-group">
-        <label for="imageInput">Slika centra (JPG/PNG):</label>
-        <input type="file" id="imageInput" accept="image/jpeg,image/png" (change)="onImageSelected($event)" class="form-control" />
-        <small *ngIf="selectedImage" style="color: green;">✓ Izabrana slika: {{ selectedImage.name }}</small>
+        <label for="imageInput">Center Image (JPG/PNG)</label>
+        <div class="file-input-wrapper">
+          <input 
+            type="file" 
+            id="imageInput" 
+            accept="image/jpeg,image/png" 
+            (change)="onImageSelected($event)" 
+            class="file-input" />
+          <label for="imageInput" class="file-input-label">
+            <span class="file-icon">📷</span>
+            <span *ngIf="!selectedImage">Choose an image</span>
+            <span *ngIf="selectedImage" class="file-selected">{{ selectedImage.name }}</span>
+          </label>
+        </div>
+        <small *ngIf="selectedImage" class="file-success">✓ Image selected</small>
       </div>
-  
+
       <div class="form-group">
-        <label for="pdfInput">PDF Dokument:</label>
-        <input type="file" id="pdfInput" accept="application/pdf" (change)="onPdfSelected($event)" class="form-control" />
-        <small *ngIf="selectedPdf" style="color: green;">✓ Izabran PDF: {{ selectedPdf.name }}</small>
+        <label for="pdfInput">PDF Document</label>
+        <div class="file-input-wrapper">
+          <input 
+            type="file" 
+            id="pdfInput" 
+            accept="application/pdf" 
+            (change)="onPdfSelected($event)" 
+            class="file-input" />
+          <label for="pdfInput" class="file-input-label">
+            <span class="file-icon">📄</span>
+            <span *ngIf="!selectedPdf">Choose a PDF</span>
+            <span *ngIf="selectedPdf" class="file-selected">{{ selectedPdf.name }}</span>
+          </label>
+        </div>
+        <small *ngIf="selectedPdf" class="file-success">✓ PDF selected</small>
       </div>
-  
+
       <!-- Submit button -->
-      <button type="submit" class="btn btn-primary">Create Centar</button>
+      <button type="submit" class="btn btn-primary btn-create">
+        Create Center
+      </button>
     </form>
   </div>
+</div>
   

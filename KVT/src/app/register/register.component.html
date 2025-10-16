@@ -1,66 +1,115 @@
-<div class="container mt-5">
-    <h2>Podnesite zahtev za registraciju na platformu</h2>
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <img src="assets/sui.png" alt="UESpass Logo" class="register-logo">
+      <h2>Create Account</h2>
+      <p class="register-subtitle">Submit your registration request</p>
+    </div>
+
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input type="text" class="form-control" id="firstName" formControlName="firstName">
-        <div *ngIf="registerForm.controls['firstName'].invalid && registerForm.controls['firstName'].touched" class="text-danger">
-          First name is required and should be at least 2 characters.
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="firstName" 
+            formControlName="firstName"
+            placeholder="Enter your first name">
+          <div *ngIf="registerForm.controls['firstName'].invalid && registerForm.controls['firstName'].touched" class="error-message">
+            <small>First name is required (min. 2 characters).</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="lastName" 
+            formControlName="lastName"
+            placeholder="Enter your last name">
+          <div *ngIf="registerForm.controls['lastName'].invalid && registerForm.controls['lastName'].touched" class="error-message">
+            <small>Last name is required (min. 2 characters).</small>
+          </div>
         </div>
       </div>
   
       <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input type="text" class="form-control" id="lastName" formControlName="lastName">
-        <div *ngIf="registerForm.controls['lastName'].invalid && registerForm.controls['lastName'].touched" class="text-danger">
-          Last name is required and should be at least 2 characters.
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" class="form-control" id="email" formControlName="email">
-        <div *ngIf="registerForm.controls['email'].invalid && registerForm.controls['email'].touched" class="text-danger">
-          Valid email is required.
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          id="email" 
+          formControlName="email"
+          placeholder="Enter your email">
+        <div *ngIf="registerForm.controls['email'].invalid && registerForm.controls['email'].touched" class="error-message">
+          <small>Valid email is required.</small>
         </div>
       </div>
   
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" formControlName="password">
-        <div *ngIf="registerForm.controls['password'].invalid && registerForm.controls['password'].touched" class="text-danger">
-          Password must be at least 8 characters.
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password" 
+          formControlName="password"
+          placeholder="Create a password (min. 8 characters)">
+        <div *ngIf="registerForm.controls['password'].invalid && registerForm.controls['password'].touched" class="error-message">
+          <small>Password must be at least 8 characters.</small>
         </div>
       </div>
   
       <div class="form-group">
-        <label for="brojTelefona">Phone</label>
-        <input type="text" class="form-control" id="brojTelefona" formControlName="brojTelefona">
-        <div *ngIf="registerForm.controls['brojTelefona'].invalid && registerForm.controls['brojTelefona'].touched" class="text-danger">
-          Phone number is required.
+        <label for="brojTelefona">Phone Number</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="brojTelefona" 
+          formControlName="brojTelefona"
+          placeholder="Enter your phone number">
+        <div *ngIf="registerForm.controls['brojTelefona'].invalid && registerForm.controls['brojTelefona'].touched" class="error-message">
+          <small>Phone number is required.</small>
         </div>
       </div>
   
       <div class="form-group">
         <label for="adresa">Address</label>
-        <input type="text" class="form-control" id="adresa" formControlName="adresa">
-        <div *ngIf="registerForm.controls['adresa'].invalid && registerForm.controls['adresa'].touched" class="text-danger">
-          Address is required.
+        <input 
+          type="text" 
+          class="form-control" 
+          id="adresa" 
+          formControlName="adresa"
+          placeholder="Enter your address">
+        <div *ngIf="registerForm.controls['adresa'].invalid && registerForm.controls['adresa'].touched" class="error-message">
+          <small>Address is required.</small>
         </div>
       </div>
   
       <div class="form-group">
-        <label for="rodjendan">Date</label>
-        <input type="date" class="form-control" id="rodjendan" formControlName="rodjendan">
-        <div *ngIf="registerForm.controls['rodjendan'].invalid && registerForm.controls['rodjendan'].touched" class="text-danger">
-          Date is required.
+        <label for="rodjendan">Date of Birth</label>
+        <input 
+          type="date" 
+          class="form-control" 
+          id="rodjendan" 
+          formControlName="rodjendan">
+        <div *ngIf="registerForm.controls['rodjendan'].invalid && registerForm.controls['rodjendan'].touched" class="error-message">
+          <small>Date of birth is required.</small>
         </div>
       </div>
   
-      <button type="submit" class="btn btn-primary" [disabled]="registerForm.invalid">Register</button>
-  
-      <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+      <button type="submit" class="btn btn-primary btn-register" [disabled]="registerForm.invalid">
+        Create Account
+      </button>
+
+      <div *ngIf="errorMessage" class="alert alert-danger mt-3">
         {{ errorMessage }}
       </div>
+
+      <div class="login-link">
+        Already have an account? <a href="/login">Sign in</a>
+      </div>
     </form>
+  </div>
 </div>
