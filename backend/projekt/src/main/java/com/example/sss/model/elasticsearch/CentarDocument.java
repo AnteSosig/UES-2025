@@ -23,10 +23,10 @@ public class CentarDocument {
     @Id
     private Integer id;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_custom_analyzer", searchAnalyzer = "serbian_custom_analyzer")
+    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
     private String ime;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_custom_analyzer", searchAnalyzer = "serbian_custom_analyzer")
+    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
     private String opis;
 
     @Field(type = FieldType.Date)
@@ -50,6 +50,6 @@ public class CentarDocument {
     @Field(type = FieldType.Text)
     private String pdfPath;
 
-    @Field(type = FieldType.Text, analyzer = "serbian_custom_analyzer", searchAnalyzer = "serbian_custom_analyzer")
+    @Field(type = FieldType.Text, analyzer = "serbian_ngram_analyzer", searchAnalyzer = "serbian_search_analyzer")
     private String pdfContent;
 }

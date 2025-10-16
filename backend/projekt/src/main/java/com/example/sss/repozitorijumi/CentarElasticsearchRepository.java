@@ -19,7 +19,8 @@ public interface CentarElasticsearchRepository extends ElasticsearchRepository<C
     List<CentarDocument> findByImeContainingOrOpisContainingOrPdfContentContaining(
         String ime, String opis, String pdfContent);
     
-    // Custom query for multi-field search with Serbian analyzer
-    @Query("{\"bool\": {\"should\": [{\"match\": {\"ime\": {\"query\": \"?0\", \"analyzer\": \"serbian_custom_analyzer\"}}}, {\"match\": {\"opis\": {\"query\": \"?0\", \"analyzer\": \"serbian_custom_analyzer\"}}}, {\"match\": {\"pdfContent\": {\"query\": \"?0\", \"analyzer\": \"serbian_custom_analyzer\"}}}]}}")
+    // Custom query for multi-field search with n-gram analyzer for partial matching
+    // Searches in ime (name), opis (description), and pdfContent (PDF text)
+    @Query("{\"bool\": {\"should\": [{\"match\": {\"ime\": {\"query\": \"?0\", \"analyzer\": \"serbian_search_analyzer\"}}}, {\"match\": {\"opis\": {\"query\": \"?0\", \"analyzer\": \"serbian_search_analyzer\"}}}, {\"match\": {\"pdfContent\": {\"query\": \"?0\", \"analyzer\": \"serbian_search_analyzer\"}}}], \"minimum_should_match\": 1}}")
     List<CentarDocument> searchByQuery(String query);
 }
