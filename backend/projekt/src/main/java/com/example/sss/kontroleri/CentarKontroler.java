@@ -583,15 +583,19 @@ public class CentarKontroler {
                     if (centar != null) {
                         if (ime != null) {
                             centarRepozitorijum.izmeniIme(ime, centar.getId());
+                            centar.setIme(ime); // Update local object for re-indexing
                         }
                         if (ophis != null) {
                             centarRepozitorijum.izmeniOphis(ophis, centar.getId());
+                            centar.setOphis(ophis); // Update local object for re-indexing
                         }
                         if (adresa != null) {
                             centarRepozitorijum.izmeniAdresu(adresa, centar.getId());
+                            centar.setAdresa(adresa); // Update local object for re-indexing
                         }
                         if (grad != null) {
                             centarRepozitorijum.izmeniGrad(grad, centar.getId());
+                            centar.setGrad(grad); // Update local object for re-indexing
                         }
                         if (discipline != null && !discipline.isEmpty()) {
                             List<Disciplina> pretragaDisciplina = disciplinaRepozitorijum.nadjiDiscipline(discipline);
@@ -608,14 +612,13 @@ public class CentarKontroler {
                         }
                         if (obrisi != null) {
                             centarRepozitorijum.obrisi(Boolean.parseBoolean(obrisi), centar.getId());
+                            centar.setActive(!Boolean.parseBoolean(obrisi)); // Update local object for re-indexing
                         }
 
                         // Re-index the updated center in Elasticsearch
+                        // Use the locally updated centar object which has the latest changes
                         try {
-                            Centar updatedCentar = centarRepozitorijum.findById(centar.getId());
-                            if (updatedCentar != null) {
-                                centarServis.indexCentar(updatedCentar);
-                            }
+                            centarServis.indexCentar(centar);
                         } catch (Exception e) {
                             System.out.println("Failed to re-index updated center: " + e.getMessage());
                         }
